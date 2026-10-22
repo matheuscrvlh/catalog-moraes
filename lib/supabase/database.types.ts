@@ -375,14 +375,14 @@ isOneToOne: false
                   ]
                 },"store_settings": {
                   Row: {
-                    "about": string | null,"address": string | null,"email": string | null,"id": number,"instagram": string | null,"phone": string | null,"store_name": string,"updated_at": string,"whatsapp": string | null
+                    "about": string | null,"address": string | null,"email": string | null,"id": number,"instagram": string | null,"phone": string | null,"show_prices": boolean,"store_name": string,"updated_at": string,"whatsapp": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "about"?: string | null,"address"?: string | null,"email"?: string | null,"id"?: number,"instagram"?: string | null,"phone"?: string | null,"store_name"?: string,"updated_at"?: string,"whatsapp"?: string | null
+                    "about"?: string | null,"address"?: string | null,"email"?: string | null,"id"?: number,"instagram"?: string | null,"phone"?: string | null,"show_prices"?: boolean,"store_name"?: string,"updated_at"?: string,"whatsapp"?: string | null
                   }
                   Update: {
-                    "about"?: string | null,"address"?: string | null,"email"?: string | null,"id"?: number,"instagram"?: string | null,"phone"?: string | null,"store_name"?: string,"updated_at"?: string,"whatsapp"?: string | null
+                    "about"?: string | null,"address"?: string | null,"email"?: string | null,"id"?: number,"instagram"?: string | null,"phone"?: string | null,"show_prices"?: boolean,"store_name"?: string,"updated_at"?: string,"whatsapp"?: string | null
                   }
                   Relationships: [
                     

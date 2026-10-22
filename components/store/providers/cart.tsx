@@ -18,7 +18,9 @@ type CartContextValue = {
   items: CartItem[];
   count: number;
   subtotal: number;
+  hasPriced: boolean;
   hasUnpriced: boolean;
+  showPrices: boolean;
   ready: boolean;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -100,8 +102,12 @@ const clear = () => cartStore.set([]);
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const items = useSyncExternalStore(cartStore.subscribe, cartStore.get, () => EMPTY);
+export function CartProvider({ showPrices, children }: { showPrices: boolean; children: ReactNode }) {
+  const stored = useSyncExternalStore(cartStore.subscribe, cartStore.get, () => EMPTY);
+  const items = useMemo(
+    () => (showPrices ? stored : stored.map((item) => ({ ...item, price: null }))),
+    [stored, showPrices],
+  );
   const ready = useSyncExternalStore(
     noopSubscribe,
     () => true,
@@ -114,7 +120,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       count: items.reduce((total, item) => total + item.quantity, 0),
       subtotal: items.reduce((total, item) => total + (item.price ?? 0) * item.quantity, 0),
+      hasPriced: items.some((item) => item.price != null),
       hasUnpriced: items.some((item) => item.price == null),
+      showPrices,
       ready,
       open,
       setOpen,
@@ -123,7 +131,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       remove,
       clear,
     }),
-    [items, ready, open],
+    [items, ready, open, showPrices],
   );
 
   return <CartContext value={value}>{children}</CartContext>;

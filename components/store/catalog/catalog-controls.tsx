@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
-import { buildQuery, SORTS, type CatalogFilters, type Sort } from "@/lib/catalog/filters";
+import { buildQuery, PRICE_SORTS, SORTS, type CatalogFilters, type Sort } from "@/lib/catalog/filters";
 
-export function SortSelect({ filters }: { filters: CatalogFilters }) {
+export function SortSelect({ filters, showPrices }: { filters: CatalogFilters; showPrices: boolean }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -25,11 +25,13 @@ export function SortSelect({ filters }: { filters: CatalogFilters }) {
         }
         className="h-10 appearance-none border border-line bg-white pr-10 pl-4 text-[13px] text-ink transition outline-none hover:border-navy focus:border-navy"
       >
-        {Object.entries(SORTS).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
+        {Object.entries(SORTS)
+          .filter(([value]) => showPrices || !PRICE_SORTS.includes(value as Sort))
+          .map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
       </select>
       <ChevronDown className="pointer-events-none absolute right-3.5 size-4 text-stone" />
     </label>

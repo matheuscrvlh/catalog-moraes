@@ -46,7 +46,9 @@ export function Exclusives({ products }: { products: ProductCard[] }) {
                   className="h-44 w-full transition duration-700 ease-out-expo group-hover:-translate-y-1.5"
                 />
                 <p className="mt-4 font-display text-lg leading-tight font-medium text-ink">{product.name}</p>
-                <p className="mt-auto pt-2 text-sm font-medium text-navy">{formatPrice(product.price)}</p>
+                {product.price != null && (
+                  <p className="mt-auto pt-2 text-sm font-medium text-navy">{formatPrice(product.price)}</p>
+                )}
               </Link>
             </Reveal>
           ))}

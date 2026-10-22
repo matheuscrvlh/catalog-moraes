@@ -38,7 +38,7 @@ erDiagram
 | `favorites` | Lista de desejos do cliente | Chave composta usuário + produto |
 | `orders` / `order_items` | Pedidos enviados pelo catálogo | Número sequencial a partir de 1001. Guarda a empresa (`customer_company`) e, nos itens, nome e preço do momento da compra |
 | `product_views` | Visitas por produto por dia | Agregado (uma linha por produto/dia) para não crescer sem controle |
-| `store_settings` | Dados da loja (WhatsApp, telefone, Instagram) | Linha única (`id = 1`) |
+| `store_settings` | Dados da loja (WhatsApp, telefone, Instagram) e preferências da plataforma (`show_prices`) | Linha única (`id = 1`) |
 | `audit_logs` | Histórico de alterações do painel | Preenchido por triggers, somente leitura para a aplicação |
 
 Views (security invoker, respeitam RLS):

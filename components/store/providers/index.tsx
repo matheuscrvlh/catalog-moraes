@@ -5,10 +5,10 @@ import { CartProvider } from "./cart";
 import { FavoritesProvider } from "./favorites";
 import { SessionProvider } from "./session";
 
-export function StoreProviders({ children }: { children: ReactNode }) {
+export function StoreProviders({ showPrices, children }: { showPrices: boolean; children: ReactNode }) {
   return (
     <SessionProvider>
-      <CartProvider>
+      <CartProvider showPrices={showPrices}>
         <FavoritesProvider>{children}</FavoritesProvider>
       </CartProvider>
     </SessionProvider>

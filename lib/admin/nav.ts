@@ -43,7 +43,7 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
     ],
   },
   {
-    group: "Loja",
+    group: "Plataforma",
     items: [{ key: "settings", href: "/admin/configuracoes", label: "Configurações", permission: "settings.manage" }],
   },
 ];

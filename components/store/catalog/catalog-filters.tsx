@@ -14,7 +14,7 @@ const PRICE_RANGES = [
   { label: "Acima de R$ 150", min: 150, max: undefined },
 ];
 
-type Props = { filters: CatalogFilters; overview: CatalogOverview };
+type Props = { filters: CatalogFilters; overview: CatalogOverview; showPrices: boolean };
 
 function hrefWith(filters: CatalogFilters, patch: Partial<CatalogFilters>) {
   return `/vinhos${buildQuery({ ...filters, ...patch, pagina: 1 })}`;
@@ -79,7 +79,7 @@ const pill = (active: boolean, tone: "navy" | "red" = "navy") =>
       : "border-line bg-white text-stone hover:border-navy hover:text-navy",
   );
 
-export function CatalogFilters({ filters, overview }: Props) {
+export function CatalogFilters({ filters, overview, showPrices }: Props) {
   return (
     <div>
       <Group title="Buscar">
@@ -147,20 +147,25 @@ export function CatalogFilters({ filters, overview }: Props) {
         </div>
       </Group>
 
-      <Group title="Preço">
-        {PRICE_RANGES.map((range) => {
-          const active = filters.min === range.min && filters.max === range.max;
-          return (
-            <Option
-              key={range.label}
-              href={hrefWith(filters, active ? { min: undefined, max: undefined } : { min: range.min, max: range.max })}
-              active={active}
-            >
-              {range.label}
-            </Option>
-          );
-        })}
-      </Group>
+      {showPrices && (
+        <Group title="Preço">
+          {PRICE_RANGES.map((range) => {
+            const active = filters.min === range.min && filters.max === range.max;
+            return (
+              <Option
+                key={range.label}
+                href={hrefWith(
+                  filters,
+                  active ? { min: undefined, max: undefined } : { min: range.min, max: range.max },
+                )}
+                active={active}
+              >
+                {range.label}
+              </Option>
+            );
+          })}
+        </Group>
+      )}
 
       <Group title="Uva">
         <div className="flex flex-wrap gap-2">

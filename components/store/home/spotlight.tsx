@@ -32,7 +32,9 @@ export function Spotlight({ products }: { products: ProductCard[] }) {
                 {product.tagline && (
                   <p className="mt-3 line-clamp-3 text-[13px] leading-relaxed text-stone">{product.tagline}</p>
                 )}
-                <p className="mt-4 text-[17px] font-medium text-navy">{formatPrice(product.price)}</p>
+                {product.price != null && (
+                  <p className="mt-4 text-[17px] font-medium text-navy">{formatPrice(product.price)}</p>
+                )}
                 {product.badge && (
                   <span className="absolute right-5 bottom-5 flex size-[68px] rotate-[-12deg] items-center justify-center rounded-full border border-dashed border-navy/50 p-2 text-center text-[8.5px] leading-tight font-semibold tracking-[0.14em] text-navy uppercase">
                     {product.badge}

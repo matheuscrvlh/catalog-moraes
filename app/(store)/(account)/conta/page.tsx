@@ -7,7 +7,8 @@ import { ProductCard } from "@/components/store/product-card";
 import { ButtonLink } from "@/components/ui/button";
 import { signOut } from "@/lib/auth/actions";
 import { requireCustomer, type Viewer } from "@/lib/auth/viewer";
-import { CARD_COLUMNS, toCard } from "@/lib/catalog/mappers";
+import { CARD_COLUMNS, toCard, withoutPrices } from "@/lib/catalog/mappers";
+import { getStoreSettings } from "@/lib/catalog/queries";
 import { cn } from "@/lib/cn";
 import { BUSINESS_TYPES, formatDateTime, formatPrice, ORDER_FLOW, ORDER_STATUS, type BusinessType } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -91,13 +92,16 @@ async function Account({ searchParams }: { searchParams: PageProps<"/conta">["se
 
 async function Orders() {
   const supabase = await createClient();
-  const { data: orders } = await supabase
-    .from("orders")
-    .select(
-      "id, number, status, subtotal, created_at, order_items(id, product_name, variant_label, quantity, line_total)",
-    )
-    .order("created_at", { ascending: false })
-    .limit(30);
+  const [{ showPrices }, { data: orders }] = await Promise.all([
+    getStoreSettings(),
+    supabase
+      .from("orders")
+      .select(
+        "id, number, status, subtotal, created_at, order_items(id, product_name, variant_label, quantity, line_total)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(30),
+  ]);
 
   if (!orders?.length) {
     return (
@@ -145,14 +149,16 @@ async function Orders() {
                   <span className="text-ink">
                     {item.quantity}× {item.product_name} <span className="text-pebble">· {item.variant_label}</span>
                   </span>
-                  <span className="text-stone">{formatPrice(item.line_total)}</span>
+                  {showPrices && <span className="text-stone">{formatPrice(item.line_total)}</span>}
                 </li>
               ))}
             </ul>
-            <div className="flex justify-between border-t border-line pt-4">
-              <span className="text-sm text-stone">Subtotal</span>
-              <span className="font-medium text-navy">{formatPrice(order.subtotal)}</span>
-            </div>
+            {showPrices && (
+              <div className="flex justify-between border-t border-line pt-4">
+                <span className="text-sm text-stone">Subtotal</span>
+                <span className="font-medium text-navy">{formatPrice(order.subtotal)}</span>
+              </div>
+            )}
           </li>
         );
       })}
@@ -171,8 +177,12 @@ async function Favorites() {
     return <Empty title="Nenhum favorito" text="Marque o coração dos rótulos que você quer acompanhar." />;
   }
 
-  const { data: rows } = await supabase.from("catalog_products").select(CARD_COLUMNS).in("id", ids);
-  const products = (rows ?? []).map(toCard);
+  const [{ showPrices }, { data: rows }] = await Promise.all([
+    getStoreSettings(),
+    supabase.from("catalog_products").select(CARD_COLUMNS).in("id", ids),
+  ]);
+  const cards = (rows ?? []).map((row) => toCard(row));
+  const products = showPrices ? cards : cards.map(withoutPrices);
 
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 lg:grid-cols-4">

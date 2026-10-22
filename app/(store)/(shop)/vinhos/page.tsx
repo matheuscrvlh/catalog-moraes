@@ -12,9 +12,10 @@ import {
   buildQuery,
   PAGE_SIZE,
   parseFilters,
+  withoutPriceFilters,
   type CatalogFilters as Filters,
 } from "@/lib/catalog/filters";
-import { getCatalogOverview, searchCatalog } from "@/lib/catalog/queries";
+import { getCatalogOverview, getStoreSettings, searchCatalog } from "@/lib/catalog/queries";
 import { formatPrice, SWEETNESS } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -52,7 +53,8 @@ export default function CatalogPage({ searchParams }: PageProps<"/vinhos">) {
 }
 
 async function Catalog({ searchParams }: { searchParams: PageProps<"/vinhos">["searchParams"] }) {
-  const filters = parseFilters(await searchParams);
+  const [params, { showPrices }] = await Promise.all([searchParams, getStoreSettings()]);
+  const filters = showPrices ? parseFilters(params) : withoutPriceFilters(parseFilters(params));
   const [overview, { items, total }] = await Promise.all([getCatalogOverview(), searchCatalog(filters)]);
   const category = overview.categories.find((entry) => entry.slug === filters.categoria);
   const chips = describeFilters(filters, category?.name);
@@ -63,7 +65,7 @@ async function Catalog({ searchParams }: { searchParams: PageProps<"/vinhos">["s
     <div className="grid gap-12 lg:grid-cols-[240px_1fr]">
       <aside className="hidden lg:block">
         <div className="sticky top-28 max-h-[calc(100vh-8rem)] scrollbar-none overflow-y-auto pr-2">
-          <CatalogFilters filters={filters} overview={overview} />
+          <CatalogFilters filters={filters} overview={overview} showPrices={showPrices} />
         </div>
       </aside>
 
@@ -77,9 +79,9 @@ async function Catalog({ searchParams }: { searchParams: PageProps<"/vinhos">["s
           </div>
           <div className="flex items-center gap-2">
             <FilterSheet activeCount={activeFilterCount(filters)}>
-              <CatalogFilters filters={filters} overview={overview} />
+              <CatalogFilters filters={filters} overview={overview} showPrices={showPrices} />
             </FilterSheet>
-            <SortSelect filters={filters} />
+            <SortSelect filters={filters} showPrices={showPrices} />
           </div>
         </header>
 

@@ -85,4 +85,5 @@ export type StoreSettings = {
   instagram: string | null;
   address: string | null;
   about: string | null;
+  showPrices: boolean;
 };

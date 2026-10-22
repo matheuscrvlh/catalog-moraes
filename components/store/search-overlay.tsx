@@ -9,6 +9,7 @@ import { getBrowserClient } from "@/lib/supabase/browser";
 import { formatPrice } from "@/lib/format";
 import { stripAccents } from "@/lib/text";
 import { BottleImage } from "./bottle-image";
+import { useCart } from "./providers/cart";
 
 type Result = {
   slug: string;
@@ -24,6 +25,7 @@ const SUGGESTIONS = ["Malbec", "Espumante brut", "Portugal", "Cabernet Sauvignon
 const escapeLike = (value: string) => value.replace(/[\\%_]/g, (char) => `\\${char}`);
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { showPrices } = useCart();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [term, setTerm] = useState("");
@@ -61,13 +63,13 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
           name: row.name!,
           producer: row.producer_name,
           country: row.country,
-          price: row.min_price,
+          price: showPrices ? row.min_price : null,
           imagePath: row.image_path,
         })),
       });
     }, 180);
     return () => clearTimeout(timer);
-  }, [term]);
+  }, [term, showPrices]);
 
   const submit = (value: string) => {
     if (!value.trim()) return;
@@ -162,7 +164,9 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                           {[result.producer, result.country].filter(Boolean).join(" · ")}
                         </span>
                       </span>
-                      <span className="text-sm font-medium text-navy">{formatPrice(result.price)}</span>
+                      {result.price != null && (
+                        <span className="text-sm font-medium text-navy">{formatPrice(result.price)}</span>
+                      )}
                       <ArrowUpRight className="size-4 text-pebble transition group-hover:text-red" />
                     </Link>
                   </li>

@@ -65,9 +65,13 @@ export function ProductCard({ product, priority, className }: Props) {
             {onSale && (
               <span className="mr-2 text-xs text-pebble line-through">{formatPrice(product.regularPrice)}</span>
             )}
-            <span className={cn("text-[17px] font-medium", onSale ? "text-red" : "text-navy")}>
-              {formatPrice(product.price)}
-            </span>
+            {product.price == null ? (
+              <span className="text-[11px] tracking-[0.18em] text-pebble uppercase">Preço sob consulta</span>
+            ) : (
+              <span className={cn("text-[17px] font-medium", onSale ? "text-red" : "text-navy")}>
+                {formatPrice(product.price)}
+              </span>
+            )}
           </div>
         </div>
       </Link>

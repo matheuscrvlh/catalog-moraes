@@ -25,7 +25,7 @@ function orderMessage(number: number, company: string | null, items: CartItem[],
     "",
     ...lines,
     "",
-    `Subtotal estimado: ${formatPrice(subtotal)}`,
+    subtotal > 0 ? `Subtotal estimado: ${formatPrice(subtotal)}` : null,
     notes ? `Observações: ${notes}` : null,
   ]
     .filter((line) => line !== null)
@@ -33,7 +33,7 @@ function orderMessage(number: number, company: string | null, items: CartItem[],
 }
 
 export function BagView({ storeWhatsapp }: { storeWhatsapp: string | null }) {
-  const { items, ready, update, remove, subtotal, hasUnpriced, clear, count } = useCart();
+  const { items, ready, update, remove, subtotal, hasPriced, hasUnpriced, clear, count } = useCart();
   const { user } = useSession();
   const router = useRouter();
   const [notes, setNotes] = useState("");
@@ -176,12 +176,20 @@ export function BagView({ storeWhatsapp }: { storeWhatsapp: string | null }) {
             <dt>Frete e prazo</dt>
             <dd>Combinados com o vendedor</dd>
           </div>
-          <div className="flex items-baseline justify-between border-t border-line pt-4">
-            <dt className="text-ink">Subtotal estimado</dt>
-            <dd className="text-2xl font-medium text-navy">{formatPrice(subtotal)}</dd>
-          </div>
+          {hasPriced && (
+            <div className="flex items-baseline justify-between border-t border-line pt-4">
+              <dt className="text-ink">Subtotal estimado</dt>
+              <dd className="text-2xl font-medium text-navy">{formatPrice(subtotal)}</dd>
+            </div>
+          )}
         </dl>
-        {hasUnpriced && <p className="text-xs text-stone">Itens sob consulta têm o valor confirmado pelo vendedor.</p>}
+        {hasUnpriced && (
+          <p className="text-xs text-stone">
+            {hasPriced
+              ? "Itens sob consulta têm o valor confirmado pelo vendedor."
+              : "Os valores são confirmados pelo vendedor após o envio do pedido."}
+          </p>
+        )}
 
         <label className="block">
           <span className="mb-2 block text-[13px] text-ink/70">Observações para o vendedor</span>

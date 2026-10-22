@@ -129,6 +129,6 @@ Abas: **Pedidos** (histórico com linha do tempo de status), **Favoritos**, **Da
 - **Clientes** `/admin/clientes`: pedidos, total gasto e último pedido.
 - **Equipe** `/admin/usuarios`: convidar membro (cria acesso), trocar cargo, desativar.
 - **Cargos** `/admin/cargos`: matriz de permissões por cargo.
-- **Configurações** `/admin/configuracoes`: dados da loja usados no site e no WhatsApp.
+- **Configurações** `/admin/configuracoes`: preferências da plataforma (exibir ou ocultar preços na loja) e dados da loja usados no site e no WhatsApp.
 
 O menu mostra só o que o cargo permite, e cada ação no servidor confere a permissão de novo antes de tocar no banco.

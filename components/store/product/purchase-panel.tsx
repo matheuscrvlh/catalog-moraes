@@ -60,7 +60,8 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
             )}
             <span
               className={cn(
-                "text-[34px] font-medium tracking-tight",
+                "font-medium tracking-tight",
+                price == null ? "text-[26px]" : "text-[34px]",
                 variant.promoPrice != null ? "text-red" : "text-navy",
               )}
             >
@@ -69,7 +70,9 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
           </motion.div>
         </AnimatePresence>
         <span className="pb-1.5 text-sm text-stone">
-          por unidade{variant.volumeMl && ` · ${formatVolume(variant.volumeMl)}`}
+          {[price != null && "por unidade", variant.volumeMl && formatVolume(variant.volumeMl)]
+            .filter(Boolean)
+            .join(" · ")}
         </span>
       </div>
 

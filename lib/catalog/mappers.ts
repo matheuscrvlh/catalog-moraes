@@ -54,3 +54,12 @@ export function toCard(row: CardRow): ProductCard {
       : null,
   };
 }
+
+export function withoutPrices(card: ProductCard): ProductCard {
+  return {
+    ...card,
+    price: null,
+    regularPrice: null,
+    defaultVariant: card.defaultVariant && { ...card.defaultVariant, price: null },
+  };
+}

@@ -155,3 +155,17 @@ export async function saveSettings(_: FormState, formData: FormData): Promise<Fo
   updateTag("settings");
   return { ok: true, message: "Configurações salvas." };
 }
+
+export async function setStorePrices(visible: boolean): Promise<FormState> {
+  if (!(await authorize("settings.manage"))) return FORBIDDEN;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("store_settings")
+    .update({ show_prices: z.boolean().parse(visible) })
+    .eq("id", 1);
+  if (error) return dbMessage(error);
+
+  updateTag("settings");
+  updateTag("catalog");
+  return { ok: true, message: visible ? "Preços visíveis na loja." : "Preços ocultos na loja." };
+}

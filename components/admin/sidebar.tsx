@@ -51,6 +51,8 @@ type Props = {
   canSeeOrders: boolean;
 };
 
+const revealActive = (node: HTMLAnchorElement | null) => node?.scrollIntoView({ block: "nearest" });
+
 function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 }
@@ -185,6 +187,7 @@ function NavContent(props: Props & { onNavigate?: () => void }) {
                   <li key={item.key}>
                     <Link
                       href={item.href}
+                      ref={active ? revealActive : undefined}
                       onClick={onNavigate}
                       className={cn(
                         "relative flex items-center gap-3 rounded-2xl px-3.5 py-[7px] text-[14px] font-medium transition",

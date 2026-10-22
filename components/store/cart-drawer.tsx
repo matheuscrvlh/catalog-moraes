@@ -11,7 +11,7 @@ import { QuantityStepper } from "./quantity-stepper";
 import { useCart } from "./providers/cart";
 
 export function CartDrawer() {
-  const { items, open, setOpen, update, remove, subtotal, count, hasUnpriced } = useCart();
+  const { items, open, setOpen, update, remove, subtotal, count, hasPriced, hasUnpriced } = useCart();
 
   useEffect(() => {
     if (!open) return;
@@ -120,12 +120,18 @@ export function CartDrawer() {
                 </ul>
 
                 <footer className="space-y-4 border-t border-line bg-ivory px-7 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-stone">Subtotal estimado</span>
-                    <span className="text-xl font-medium text-navy">{formatPrice(subtotal)}</span>
-                  </div>
+                  {hasPriced && (
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm text-stone">Subtotal estimado</span>
+                      <span className="text-xl font-medium text-navy">{formatPrice(subtotal)}</span>
+                    </div>
+                  )}
                   {hasUnpriced && (
-                    <p className="text-xs text-stone">Itens sob consulta têm o valor confirmado pelo vendedor.</p>
+                    <p className="text-xs text-stone">
+                      {hasPriced
+                        ? "Itens sob consulta têm o valor confirmado pelo vendedor."
+                        : "Os valores são confirmados pelo vendedor após o envio do pedido."}
+                    </p>
                   )}
                   <ButtonLink href="/sacola" className="w-full" size="lg" onClick={() => setOpen(false)}>
                     Revisar e enviar pedido

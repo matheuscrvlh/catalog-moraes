@@ -64,3 +64,14 @@ export function activeFilterCount(filters: CatalogFilters) {
     (value) => value !== undefined,
   ).length;
 }
+
+export const PRICE_SORTS: readonly Sort[] = ["menor-preco", "maior-preco"];
+
+export function withoutPriceFilters(filters: CatalogFilters): CatalogFilters {
+  return {
+    ...filters,
+    min: undefined,
+    max: undefined,
+    ordem: PRICE_SORTS.includes(filters.ordem) ? "destaque" : filters.ordem,
+  };
+}

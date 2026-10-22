@@ -3,7 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { stripAccents } from "@/lib/text";
 import { PAGE_SIZE, type CatalogFilters } from "./filters";
-import { CARD_COLUMNS, toCard } from "./mappers";
+import { CARD_COLUMNS, toCard, withoutPrices, type CardRow } from "./mappers";
 import type { Banner, CatalogOverview, Category, Facet, ProductDetail, StoreSettings } from "./types";
 
 function countBy(values: string[]): Facet[] {
@@ -33,7 +33,14 @@ export async function getStoreSettings(): Promise<StoreSettings> {
     instagram: data?.instagram ?? null,
     address: data?.address ?? null,
     about: data?.about ?? null,
+    showPrices: data?.show_prices ?? true,
   };
+}
+
+async function toCards(rows: CardRow[] | null) {
+  const { showPrices } = await getStoreSettings();
+  const cards = (rows ?? []).map((row) => toCard(row));
+  return showPrices ? cards : cards.map(withoutPrices);
 }
 
 export async function getCatalogOverview(): Promise<CatalogOverview> {
@@ -112,7 +119,7 @@ export async function searchCatalog(filters: CatalogFilters) {
   const { data, count, error } = await query.order("id").range(0, filters.pagina * PAGE_SIZE - 1);
   if (error) throw error;
 
-  return { items: (data ?? []).map(toCard), total: count ?? 0 };
+  return { items: await toCards(data), total: count ?? 0 };
 }
 
 export async function getFeaturedProducts(limit = 10) {
@@ -128,7 +135,7 @@ export async function getFeaturedProducts(limit = 10) {
     .order("min_price", { ascending: false })
     .limit(limit);
 
-  return (data ?? []).map(toCard);
+  return toCards(data);
 }
 
 export async function getProductsByBadge(badge: string, limit = 8) {
@@ -144,7 +151,7 @@ export async function getProductsByBadge(badge: string, limit = 8) {
     .order("name")
     .limit(limit);
 
-  return (data ?? []).map(toCard);
+  return toCards(data);
 }
 
 export async function getProductsOnSale(limit = 8) {
@@ -161,8 +168,7 @@ export async function getProductsOnSale(limit = 8) {
     .order("min_regular_price", { ascending: false })
     .limit(60);
 
-  return (data ?? [])
-    .map(toCard)
+  return (await toCards(data))
     .filter((product) => product.price != null && product.regularPrice != null && product.price < product.regularPrice)
     .slice(0, limit);
 }
@@ -181,7 +187,7 @@ export async function getNewestProducts(limit = 8) {
     .order("name", { ascending: false })
     .limit(limit);
 
-  return (data ?? []).map(toCard);
+  return toCards(data);
 }
 
 export async function getRelatedProducts(categorySlug: string, excludeId: string, limit = 8) {
@@ -199,7 +205,7 @@ export async function getRelatedProducts(categorySlug: string, excludeId: string
     .order("total_stock", { ascending: false })
     .limit(limit);
 
-  return (data ?? []).map(toCard);
+  return toCards(data);
 }
 
 export async function getProductSlugs() {
@@ -236,9 +242,11 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
   ]);
 
   if (!product || !card) return null;
+  const [summary] = await toCards([card]);
+  const { showPrices } = await getStoreSettings();
 
   return {
-    ...toCard(card),
+    ...summary,
     description: product.description,
     sweetness: product.sweetness,
     vintage: product.vintage,
@@ -258,8 +266,8 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
       id: variant.id,
       label: variant.label,
       volumeMl: variant.volume_ml,
-      price: variant.price,
-      promoPrice: variant.promo_price,
+      price: showPrices ? variant.price : null,
+      promoPrice: showPrices ? variant.promo_price : null,
       stock: variant.stock,
     })),
     producerSlug: product.producer?.slug ?? null,
