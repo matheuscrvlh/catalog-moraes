@@ -36,7 +36,9 @@ erDiagram
 | `product_images` | Galeria | `path` aceita caminho local (`/products/x.webp`) ou URL do Storage |
 | `banners` | Carrossel da home | Janela de exibição opcional (`starts_at`/`ends_at`) e tema visual |
 | `favorites` | Lista de desejos do cliente | Chave composta usuário + produto |
-| `orders` / `order_items` | Pedidos da loja ou criados pela equipe (`created_by`) | Número sequencial a partir de 1001. Guarda a empresa (`customer_company`) e, nos itens, nome e preço do momento da compra |
+| `orders` / `order_items` | Pedidos da loja ou criados pela equipe (`created_by`) | Número sequencial a partir de 1001. Status: `novo` → `confirmado` → `em_rota` → `entregue` (ou `cancelado`). Guarda a empresa (`customer_company`) e, nos itens, nome e preço do momento da compra |
+| `order_events` | Histórico do pedido: criação, mudança de status e comentários | Criação e status são gravados por trigger (`track_order_events`); a equipe só insere comentários próprios. Imutável (sem update/delete) |
+| `order_files` | Fotos e arquivos anexados a um comentário | Arquivo no bucket privado `order-files`, caminho `{order_id}/…`; lido por URL assinada de 1 hora. Até 10 MB por arquivo |
 | `product_views` | Visitas por produto por dia | Agregado (uma linha por produto/dia) para não crescer sem controle |
 | `store_settings` | Dados da loja (WhatsApp, telefone, Instagram) e preferências da plataforma (`show_prices`) | Linha única (`id = 1`) |
 | `audit_logs` | Histórico de alterações do painel | Preenchido por triggers, somente leitura para a aplicação |

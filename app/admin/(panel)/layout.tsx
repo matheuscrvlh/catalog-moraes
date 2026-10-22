@@ -35,7 +35,7 @@ async function Sidebar() {
   const canSeeOrders = can(viewer, "orders.manage");
   const [{ count: pending }, { count: activeProducts }] = await Promise.all([
     canSeeOrders
-      ? supabase.from("orders").select("id", { count: "exact", head: true }).in("status", ["novo", "em_atendimento"])
+      ? supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "novo")
       : { count: 0 },
     supabase.from("products").select("id", { count: "exact", head: true }).eq("active", true),
   ]);

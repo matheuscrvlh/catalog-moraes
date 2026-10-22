@@ -70,7 +70,7 @@ export async function searchCustomers(term: string): Promise<CustomerOption[]> {
         .join(","),
     );
   }
-  const { data } = await query.order("company_name", { nullsFirst: false }).limit(8);
+  const { data } = await query.order("company_name", { nullsFirst: false }).limit(40);
 
   return (data ?? []).map((row) => ({
     id: row.id!,

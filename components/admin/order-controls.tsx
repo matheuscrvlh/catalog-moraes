@@ -2,11 +2,9 @@
 
 import { useTransition } from "react";
 import { Check } from "lucide-react";
-import { updateOrderStatus, saveInternalNotes } from "@/lib/admin/order-actions";
+import { updateOrderStatus } from "@/lib/admin/order-actions";
 import { cn } from "@/lib/cn";
 import { ORDER_FLOW, ORDER_STATUS, type OrderStatus } from "@/lib/format";
-import { Textarea } from "@/components/ui/field";
-import { ActionForm } from "./action-form";
 import { useToast } from "./toaster";
 
 export function StatusStepper({ orderId, status }: { orderId: string; status: OrderStatus }) {
@@ -65,24 +63,5 @@ export function StatusStepper({ orderId, status }: { orderId: string; status: Or
         </button>
       )}
     </div>
-  );
-}
-
-export function InternalNotes({ orderId, notes }: { orderId: string; notes: string | null }) {
-  return (
-    <ActionForm action={saveInternalNotes} submitLabel="Salvar anotação" className="space-y-3">
-      {() => (
-        <>
-          <input type="hidden" name="orderId" value={orderId} />
-          <Textarea
-            tone="light"
-            name="internalNotes"
-            defaultValue={notes ?? ""}
-            maxLength={2000}
-            placeholder="Forma de pagamento, endereço de entrega, observações da equipe…"
-          />
-        </>
-      )}
-    </ActionForm>
   );
 }

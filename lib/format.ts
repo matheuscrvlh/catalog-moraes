@@ -53,13 +53,13 @@ export const SWEETNESS: Record<Sweetness, string> = {
 
 export const ORDER_STATUS: Record<OrderStatus, { label: string; tone: string }> = {
   novo: { label: "Novo", tone: "#e3262e" },
-  em_atendimento: { label: "Em atendimento", tone: "#23b4ee" },
-  confirmado: { label: "Confirmado", tone: "#d6b36a" },
+  confirmado: { label: "Confirmado", tone: "#2f43b8" },
+  em_rota: { label: "Em rota", tone: "#1fa3d6" },
   entregue: { label: "Entregue", tone: "#2f9e6e" },
   cancelado: { label: "Cancelado", tone: "#8a8fa8" },
 };
 
-export const ORDER_FLOW: OrderStatus[] = ["novo", "em_atendimento", "confirmado", "entregue"];
+export const ORDER_FLOW: OrderStatus[] = ["novo", "confirmado", "em_rota", "entregue"];
 
 export function whatsappLink(phone: string | null | undefined, message?: string) {
   const digits = (phone ?? "").replace(/\D/g, "");

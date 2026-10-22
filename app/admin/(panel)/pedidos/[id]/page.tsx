@@ -4,9 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ArrowLeft, Mail, Phone } from "lucide-react";
-import { InternalNotes, StatusStepper } from "@/components/admin/order-controls";
+import { OrderComposer } from "@/components/admin/order-composer";
+import { StatusStepper } from "@/components/admin/order-controls";
+import { OrderTimeline } from "@/components/admin/order-timeline";
 import { Badge, Card, CardTitle, PageHeader, PanelSkeleton } from "@/components/admin/ui";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
+import { getOrderLog } from "@/lib/admin/order-log";
 import { requireStaff } from "@/lib/auth/viewer";
 import { formatDateTime, formatPrice, ORDER_STATUS, whatsappLink } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
@@ -31,7 +34,7 @@ async function OrderDetail({ params }: { params: PageProps<"/admin/pedidos/[id]"
   const { data: order } = await supabase
     .from("orders")
     .select(
-      `id, number, status, subtotal, notes, internal_notes, customer_name, customer_company, customer_phone, created_at, updated_at, customer_id,
+      `id, number, status, subtotal, notes, created_by, customer_name, customer_company, customer_phone, created_at, updated_at, customer_id,
        customer:profiles!orders_customer_id_fkey(email),
        handler:profiles!orders_handled_by_fkey(full_name),
        creator:profiles!orders_created_by_fkey(full_name),
@@ -43,9 +46,12 @@ async function OrderDetail({ params }: { params: PageProps<"/admin/pedidos/[id]"
   if (!order) notFound();
 
   const productIds = order.order_items.map((item) => item.product_id).filter(Boolean) as string[];
-  const { data: images } = productIds.length
-    ? await supabase.from("catalog_products").select("id, image_path").in("id", productIds)
-    : { data: [] };
+  const [{ data: images }, events] = await Promise.all([
+    productIds.length
+      ? supabase.from("catalog_products").select("id, image_path").in("id", productIds)
+      : Promise.resolve({ data: [] as { id: string | null; image_path: string | null }[] }),
+    getOrderLog(order.id),
+  ]);
   const imageFor = new Map((images ?? []).map((row) => [row.id, row.image_path]));
   const status = ORDER_STATUS[order.status];
   const greeting = `Olá, ${order.customer_name.split(" ")[0]}! Aqui é da Moraes Comercial sobre o seu pedido #${order.number}.`;
@@ -111,6 +117,15 @@ async function OrderDetail({ params }: { params: PageProps<"/admin/pedidos/[id]"
               <span className="text-2xl font-semibold">{formatPrice(order.subtotal)}</span>
             </div>
           </Card>
+
+          <Card>
+            <CardTitle
+              title="Histórico"
+              description="Comentários, anexos e mudanças de status. Visível apenas para a equipe."
+            />
+            <OrderComposer orderId={order.id} />
+            <OrderTimeline events={events} fromStore={!order.created_by} />
+          </Card>
         </div>
 
         <div className="space-y-5">
@@ -148,11 +163,6 @@ async function OrderDetail({ params }: { params: PageProps<"/admin/pedidos/[id]"
               <p className="text-sm whitespace-pre-line text-ink/75">{order.notes}</p>
             </Card>
           )}
-
-          <Card>
-            <CardTitle title="Anotações internas" description="Visível apenas para a equipe." />
-            <InternalNotes orderId={order.id} notes={order.internal_notes} />
-          </Card>
         </div>
       </div>
     </>

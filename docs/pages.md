@@ -125,8 +125,8 @@ Abas: **Pedidos** (histórico com linha do tempo de status), **Favoritos**, **Da
 - **Produtos** `/admin/produtos`: tabela com foto, estilo, vinícola, faixa de preço, barra de estoque e status; busca e filtro por estilo.
 - **Produto** `/admin/produtos/novo` e `/admin/produtos/[id]`: seções (identificação, classificação, perfil sensorial com sliders, serviço, variações em linhas editáveis, imagens com upload) e prévia do card ao vivo.
 - **Categorias**, **Vinícolas**: listas com formulário lateral.
-- **Pedidos** `/admin/pedidos`: abas por status com contagem e origem (loja ou equipe); detalhe com itens, cliente, troca de status, notas internas e botão para chamar o cliente no WhatsApp.
-- **Novo pedido** `/admin/pedidos/novo`: pensado para tablet, o vendedor percorre o catálogo completo com o cliente (busca, filtro por estilo e "No pedido" para ver o que já entrou), escolhe ou cadastra o cliente e cria o pedido em nome da empresa (`admin_create_order`). Entra como "Em atendimento".
+- **Pedidos** `/admin/pedidos`: abas por status (novo, confirmado, em rota, entregue, cancelado) com contagem e origem (loja ou equipe); detalhe com itens, cliente, troca de status, botão para chamar o cliente no WhatsApp e **Histórico** do pedido: comentários com fotos e arquivos anexados e o registro automático de criação e de cada mudança de status.
+- **Novo pedido** `/admin/pedidos/novo`: pensado para tablet, o vendedor percorre o catálogo completo com o cliente (busca, filtro por estilo e "No pedido" para ver o que já entrou), e finaliza no modal **Pedido**, onde escolhe o cliente num select com busca (ou cadastra um novo), revisa itens e observações e cria o pedido em nome da empresa (`admin_create_order`). Entra como "Confirmado".
 - **Clientes** `/admin/clientes`: pedidos, total gasto e último pedido. "Novo cliente" cadastra a empresa; com senha, ela também acessa a loja.
 - **Equipe** `/admin/usuarios`: convidar membro (cria acesso), trocar cargo, desativar.
 - **Cargos** `/admin/cargos`: matriz de permissões por cargo.

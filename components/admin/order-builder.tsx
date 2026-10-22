@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  ArrowDown,
   Building2,
   Check,
+  ChevronDown,
   Minus,
   PackageSearch,
   Plus,
@@ -14,6 +14,7 @@ import {
   ShoppingBag,
   Trash2,
   UserPlus,
+  X,
 } from "lucide-react";
 import { BottleImage } from "@/components/store/bottle-image";
 import { Button } from "@/components/ui/button";
@@ -25,148 +26,136 @@ import { formatPrice } from "@/lib/format";
 import { stripAccents } from "@/lib/text";
 import { CustomerSheet } from "./customer-sheet";
 import { useToast } from "./toaster";
-import { Card, CardTitle } from "./ui";
+import { Card } from "./ui";
 
 type Quantities = Record<string, number>;
 type Line = { product: OrderProduct; variant: OrderProduct["variants"][number]; quantity: number };
 
 const normalize = (value: string) => stripAccents(value).toLowerCase();
 
-function useSearch<T>(term: string, search: (term: string) => Promise<T[]>) {
-  const [response, setResponse] = useState<{ term: string; results: T[] } | null>(null);
+const field =
+  "h-12 w-full rounded-2xl border border-ink/10 bg-cloud/60 pr-4 pl-11 text-[14px] text-ink transition outline-none placeholder:text-mist focus:border-royal/40 focus:bg-white focus:ring-4 focus:ring-royal/10";
+
+function useCustomerSearch(term: string, enabled: boolean) {
+  const [response, setResponse] = useState<{ term: string; results: CustomerOption[] } | null>(null);
 
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
     const timer = setTimeout(async () => {
-      const results = await search(term);
+      const results = await searchCustomers(term);
       if (active) setResponse({ term, results });
-    }, 200);
+    }, 180);
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [term, search]);
+  }, [term, enabled]);
 
   return { results: response?.results ?? [], loading: response?.term !== term };
 }
 
-const field =
-  "h-12 w-full rounded-2xl border border-ink/10 bg-cloud/60 pr-4 pl-11 text-[14px] text-ink transition outline-none placeholder:text-mist focus:border-royal/40 focus:bg-white focus:ring-4 focus:ring-royal/10";
-
-function SearchBox({
+function CustomerSelect({
   value,
   onChange,
-  placeholder,
-  children,
-  open,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  children: ReactNode;
-  open: boolean;
+  value: CustomerOption | null;
+  onChange: (customer: CustomerOption) => void;
 }) {
-  return (
-    <div className="relative">
-      <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-mist" />
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className={field}
-        autoComplete="off"
-      />
-      <AnimatePresence>
-        {open && (
-          <motion.ul
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="absolute inset-x-0 top-full z-20 mt-2 max-h-80 overflow-y-auto rounded-2xl border border-ink/6 bg-white p-1.5 shadow-[0_24px_50px_-20px_rgba(23,25,43,0.35)]"
-          >
-            {children}
-          </motion.ul>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function CustomerPicker({
-  customer,
-  onSelect,
-}: {
-  customer: CustomerOption | null;
-  onSelect: (customer: CustomerOption | null) => void;
-}) {
+  const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
-  const [focused, setFocused] = useState(false);
-  const { results, loading } = useSearch(term, searchCustomers);
+  const { results, loading } = useCustomerSearch(term, open);
 
-  if (customer) {
-    return (
-      <div className="flex items-center gap-4 rounded-2xl border border-royal/20 bg-royal/5 p-4">
-        <span className="flex size-11 items-center justify-center rounded-2xl bg-white text-royal">
-          <Building2 className="size-5" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-semibold text-ink">{customer.company}</span>
-          <span className="block truncate text-[13px] text-mist">
-            {[customer.contact, customer.email].filter(Boolean).join(" · ")}
-          </span>
-        </span>
+  return (
+    <div>
+      <div className="flex flex-col gap-2 sm:flex-row">
         <button
           type="button"
-          onClick={() => onSelect(null)}
-          className="rounded-xl px-3 py-2 text-[13px] font-medium text-royal hover:bg-white"
-        >
-          Trocar
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="flex flex-col gap-3 sm:flex-row"
-      onFocus={() => setFocused(true)}
-      onBlur={() => setTimeout(() => setFocused(false), 150)}
-    >
-      <div className="flex-1">
-        <SearchBox
-          value={term}
-          onChange={setTerm}
-          placeholder="Buscar por empresa, contato, e-mail ou CNPJ"
-          open={focused && (results.length > 0 || !loading)}
-        >
-          {results.length ? (
-            results.map((option) => (
-              <li key={option.id}>
-                <button
-                  type="button"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => onSelect(option)}
-                  className="flex w-full flex-col rounded-xl px-3.5 py-2.5 text-left hover:bg-cloud"
-                >
-                  <span className="text-[14px] font-medium text-ink">{option.company}</span>
-                  <span className="text-[12px] text-mist">
-                    {[option.contact, option.email].filter(Boolean).join(" · ")}
-                  </span>
-                </button>
-              </li>
-            ))
-          ) : (
-            <li className="px-3.5 py-3 text-[13px] text-mist">Nenhum cliente encontrado.</li>
+          onClick={() => setOpen((current) => !current)}
+          aria-expanded={open}
+          className={cn(
+            "flex h-14 min-w-0 flex-1 items-center gap-3 rounded-2xl border bg-white px-4 text-left transition",
+            open ? "border-royal/40 ring-4 ring-royal/10" : "border-ink/10 hover:border-ink/25",
           )}
-        </SearchBox>
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cloud text-royal">
+            <Building2 className="size-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            {value ? (
+              <>
+                <span className="block truncate text-[14.5px] font-semibold text-ink">{value.company}</span>
+                <span className="block truncate text-[12px] text-mist">
+                  {[value.contact, value.email].filter(Boolean).join(" · ")}
+                </span>
+              </>
+            ) : (
+              <span className="text-[14px] text-mist">Selecione o cliente</span>
+            )}
+          </span>
+          <ChevronDown className={cn("size-4 shrink-0 text-mist transition", open && "rotate-180")} />
+        </button>
+        <CustomerSheet
+          trigger={(openSheet) => (
+            <Button type="button" variant="line" onClick={openSheet} className="h-14 shrink-0">
+              <UserPlus className="size-4" /> Novo cliente
+            </Button>
+          )}
+        />
       </div>
-      <CustomerSheet
-        trigger={(open) => (
-          <Button type="button" variant="line" onClick={open} className="h-12 shrink-0">
-            <UserPlus className="size-4" /> Cadastrar cliente
-          </Button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-2 rounded-2xl border border-ink/8 bg-white p-2 shadow-[0_18px_40px_-24px_rgba(23,25,43,0.35)]">
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-mist" />
+                <input
+                  autoFocus
+                  value={term}
+                  onChange={(event) => setTerm(event.target.value)}
+                  placeholder="Digite empresa, contato, e-mail ou CNPJ"
+                  className="h-11 w-full rounded-xl bg-cloud/70 pr-3 pl-10 text-[14px] outline-none placeholder:text-mist focus:bg-cloud"
+                  autoComplete="off"
+                />
+              </div>
+              <ul className="mt-1.5 max-h-64 overflow-y-auto">
+                {results.map((option) => (
+                  <li key={option.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onChange(option);
+                        setOpen(false);
+                        setTerm("");
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-cloud"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[14px] font-medium text-ink">{option.company}</span>
+                        <span className="block truncate text-[12px] text-mist">
+                          {[option.contact, option.email].filter(Boolean).join(" · ")}
+                        </span>
+                      </span>
+                      {value?.id === option.id && <Check className="size-4 text-royal" />}
+                    </button>
+                  </li>
+                ))}
+                {!results.length && (
+                  <li className="px-3 py-4 text-center text-[13px] text-mist">
+                    {loading ? "Carregando clientes…" : "Nenhum cliente encontrado."}
+                  </li>
+                )}
+              </ul>
+            </div>
+          </motion.div>
         )}
-      />
+      </AnimatePresence>
     </div>
   );
 }
@@ -301,10 +290,12 @@ function Catalog({
   products,
   quantities,
   setQuantity,
+  summary,
 }: {
   products: OrderProduct[];
   quantities: Quantities;
   setQuantity: (variantId: string, quantity: number) => void;
+  summary: { units: number; subtotal: number; open: () => void };
 }) {
   const [term, setTerm] = useState("");
   const [filter, setFilter] = useState<string | null>(null);
@@ -331,7 +322,7 @@ function Catalog({
               product.country,
               product.category.name,
               ...product.grapes,
-              ...product.variants.map((v) => v.label),
+              ...product.variants.map((variant) => variant.label),
             ].join(" "),
           ),
         ]),
@@ -350,14 +341,14 @@ function Catalog({
 
   const chip = (active: boolean) =>
     cn(
-      "inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[13.5px] font-medium transition",
+      "inline-flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-medium transition",
       active ? "bg-ink text-white" : "bg-cloud text-ink/70 hover:text-ink",
     );
 
   return (
     <Card className="@container p-5 md:p-6">
-      <div className="flex flex-col gap-4">
-        <div className="relative">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-mist" />
           <input
             type="search"
@@ -368,31 +359,45 @@ function Catalog({
             autoComplete="off"
           />
         </div>
-        <div className="-mx-1 flex scrollbar-none gap-2 overflow-x-auto px-1 pb-1">
-          <button type="button" onClick={() => setFilter(null)} className={chip(filter === null)}>
-            Todos <span className="text-[12px] opacity-60">{products.length}</span>
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category.slug}
-              type="button"
-              onClick={() => setFilter(filter === category.slug ? null : category.slug)}
-              className={chip(filter === category.slug)}
-            >
-              <span className="size-2 rounded-full" style={{ background: category.accent }} />
-              {category.name}
-              <span className="text-[12px] opacity-60">{category.count}</span>
-            </button>
-          ))}
+        <button
+          type="button"
+          onClick={summary.open}
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-2.5 rounded-2xl bg-navy px-5 text-[14px] font-semibold text-white shadow-[0_10px_24px_-12px_rgba(27,42,120,0.8)] transition hover:bg-navy-900"
+        >
+          <ShoppingBag className="size-4" />
+          Pedido
+          {summary.units > 0 && (
+            <span className="rounded-full bg-white/15 px-2 py-0.5 text-[12px] tabular-nums">
+              {summary.units} · {formatPrice(summary.subtotal)}
+            </span>
+          )}
+        </button>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button type="button" onClick={() => setFilter(null)} className={chip(filter === null)}>
+          Todos <span className="text-[12px] opacity-60">{products.length}</span>
+        </button>
+        {categories.map((category) => (
           <button
+            key={category.slug}
             type="button"
-            onClick={() => setFilter(filter === ORDERED ? null : ORDERED)}
-            className={cn(chip(filter === ORDERED), filter !== ORDERED && orderedCount > 0 && "bg-royal/10 text-royal")}
+            onClick={() => setFilter(filter === category.slug ? null : category.slug)}
+            className={chip(filter === category.slug)}
           >
-            <ShoppingBag className="size-4" /> No pedido
-            <span className="text-[12px] opacity-60">{orderedCount}</span>
+            <span className="size-2 rounded-full" style={{ background: category.accent }} />
+            {category.name}
+            <span className="text-[12px] opacity-60">{category.count}</span>
           </button>
-        </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setFilter(filter === ORDERED ? null : ORDERED)}
+          className={cn(chip(filter === ORDERED), filter !== ORDERED && orderedCount > 0 && "bg-royal/10 text-royal")}
+        >
+          <ShoppingBag className="size-4" /> No pedido
+          <span className="text-[12px] opacity-60">{orderedCount}</span>
+        </button>
       </div>
 
       {visible.length ? (
@@ -416,35 +421,43 @@ function Catalog({
   );
 }
 
-export function OrderBuilder({ products }: { products: OrderProduct[] }) {
+function OrderDialog({
+  open,
+  onClose,
+  lines,
+  units,
+  subtotal,
+  setQuantity,
+}: {
+  open: boolean;
+  onClose: () => void;
+  lines: Line[];
+  units: number;
+  subtotal: number;
+  setQuantity: (variantId: string, quantity: number) => void;
+}) {
   const router = useRouter();
   const notify = useToast();
   const [customer, setCustomer] = useState<CustomerOption | null>(null);
-  const [quantities, setQuantities] = useState<Quantities>({});
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-
-  const lines: Line[] = products.flatMap((product) =>
-    product.variants
-      .filter((variant) => quantities[variant.id])
-      .map((variant) => ({ product, variant, quantity: quantities[variant.id] })),
-  );
-  const units = lines.reduce((sum, line) => sum + line.quantity, 0);
-  const subtotal = lines.reduce((sum, line) => sum + (line.variant.price ?? 0) * line.quantity, 0);
   const unpriced = lines.some((line) => line.variant.price == null);
 
-  const setQuantity = (variantId: string, quantity: number) =>
-    setQuantities((current) => {
-      const next = { ...current };
-      if (quantity <= 0) delete next[variantId];
-      else next[variantId] = Math.min(999, quantity);
-      return next;
-    });
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && onClose();
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
 
   const submit = () => {
     setError(null);
-    if (!customer) return setError("Escolha o cliente do pedido.");
+    if (!customer) return setError("Selecione o cliente do pedido.");
     if (!lines.length) return setError("Adicione ao menos um produto.");
     startTransition(async () => {
       const result = await createStaffOrder({
@@ -459,124 +472,186 @@ export function OrderBuilder({ products }: { products: OrderProduct[] }) {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-5 pb-24 min-[1140px]:grid-cols-[minmax(0,1fr)_350px] min-[1140px]:pb-0">
-      <div className="min-w-0 space-y-5">
-        <Card className="p-5 md:p-6">
-          <CardTitle title="Cliente" description="Empresa que vai receber o pedido." />
-          <CustomerPicker customer={customer} onSelect={setCustomer} />
-        </Card>
-        <Catalog products={products} quantities={quantities} setQuantity={setQuantity} />
-      </div>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-60 flex items-end justify-center bg-ink/40 backdrop-blur-[2px] md:items-center md:p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        >
+          <motion.section
+            role="dialog"
+            aria-modal="true"
+            aria-label="Pedido"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            transition={{ type: "spring", damping: 30, stiffness: 320 }}
+            onClick={(event) => event.stopPropagation()}
+            className="flex max-h-[94svh] w-full flex-col overflow-hidden rounded-t-[28px] bg-white text-ink shadow-2xl md:max-h-[88svh] md:max-w-2xl md:rounded-[28px]"
+          >
+            <header className="flex items-start justify-between gap-4 border-b border-ink/6 px-6 py-5">
+              <div>
+                <h2 className="text-[22px] font-bold">Pedido</h2>
+                <p className="mt-0.5 text-[13px] text-mist">
+                  {lines.length} {lines.length === 1 ? "rótulo" : "rótulos"} · {units} un.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-xl p-2 text-mist hover:bg-cloud hover:text-ink"
+                aria-label="Fechar"
+              >
+                <X className="size-5" />
+              </button>
+            </header>
 
-      <Card
-        id="resumo"
-        className="h-fit scroll-mt-4 space-y-5 p-5 min-[1140px]:sticky min-[1140px]:top-4 min-[1140px]:max-h-[calc(100svh-2rem)] min-[1140px]:overflow-y-auto md:p-6"
-      >
-        <CardTitle title="Pedido" description={customer ? customer.company : "Escolha o cliente para finalizar."} />
+            <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+              <section>
+                <h3 className="mb-2 text-[13px] font-semibold text-ink/70">Cliente</h3>
+                <CustomerSelect value={customer} onChange={setCustomer} />
+              </section>
 
-        {lines.length ? (
-          <ul className="divide-y divide-ink/6">
-            <AnimatePresence initial={false}>
-              {lines.map((line) => (
-                <motion.li
-                  key={line.variant.id}
-                  layout
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="flex items-center gap-3 py-3"
-                >
-                  <BottleImage path={line.product.imagePath} alt="" sizes="32px" className="h-12 w-8 shrink-0" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-medium text-ink">{line.product.name}</span>
-                    <span className="block text-[12px] text-mist">
-                      {line.variant.label} ·{" "}
-                      {line.variant.price == null ? "a confirmar" : formatPrice(line.variant.price * line.quantity)}
-                    </span>
-                    <span className="mt-1.5 flex items-center gap-1">
-                      <Stepper
-                        size="sm"
-                        value={line.quantity}
-                        onChange={(value) => setQuantity(line.variant.id, value)}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setQuantity(line.variant.id, 0)}
-                        className="rounded-lg p-2 text-mist transition hover:bg-red-100 hover:text-red"
-                        aria-label={`Remover ${line.product.name}`}
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </span>
-                  </span>
-                </motion.li>
-              ))}
-            </AnimatePresence>
-          </ul>
-        ) : (
-          <p className="rounded-2xl bg-cloud/70 px-4 py-6 text-center text-[13px] text-mist">
-            Os vinhos adicionados aparecem aqui.
-          </p>
-        )}
+              <section>
+                <h3 className="mb-1 text-[13px] font-semibold text-ink/70">Itens</h3>
+                {lines.length ? (
+                  <ul className="divide-y divide-ink/6">
+                    {lines.map((line) => (
+                      <li key={line.variant.id} className="flex items-center gap-3 py-3">
+                        <BottleImage path={line.product.imagePath} alt="" sizes="32px" className="h-12 w-8 shrink-0" />
+                        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[14px] font-medium text-ink">{line.product.name}</span>
+                            <span className="block text-[12px] text-mist">
+                              {line.variant.label} · {formatPrice(line.variant.price)} / un.
+                            </span>
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <Stepper
+                              size="sm"
+                              value={line.quantity}
+                              onChange={(value) => setQuantity(line.variant.id, value)}
+                            />
+                            <span className="flex-1 text-right text-[14px] font-semibold tabular-nums sm:w-24 sm:flex-none">
+                              {line.variant.price == null ? "—" : formatPrice(line.variant.price * line.quantity)}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setQuantity(line.variant.id, 0)}
+                              className="rounded-lg p-2 text-mist transition hover:bg-red-100 hover:text-red"
+                              aria-label={`Remover ${line.product.name}`}
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="rounded-2xl bg-cloud/70 px-4 py-6 text-center text-[13px] text-mist">
+                    Nenhum vinho no pedido. Feche e toque em Adicionar no catálogo.
+                  </p>
+                )}
+              </section>
 
-        <dl className="space-y-2 border-t border-ink/6 pt-4 text-[14px]">
-          <div className="flex justify-between">
-            <dt className="text-mist">Rótulos · unidades</dt>
-            <dd className="font-medium text-ink tabular-nums">
-              {lines.length} · {units}
-            </dd>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <dt className="text-ink">Subtotal</dt>
-            <dd className="text-2xl font-bold text-ink tabular-nums">{formatPrice(subtotal)}</dd>
-          </div>
-        </dl>
-        {unpriced && <p className="text-[12.5px] text-mist">Itens sem preço entram com valor a confirmar.</p>}
+              <label className="block">
+                <span className="mb-2 block text-[13px] font-semibold text-ink/70">Observações</span>
+                <Textarea
+                  tone="light"
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  maxLength={500}
+                  rows={3}
+                  placeholder="Entrega, pagamento, nota fiscal…"
+                />
+              </label>
+            </div>
 
-        <label className="block">
-          <span className="mb-2 block text-[13px] font-medium text-ink/70">Observações do pedido</span>
-          <Textarea
-            tone="light"
-            value={notes}
-            onChange={(event) => setNotes(event.target.value)}
-            maxLength={500}
-            rows={3}
-            placeholder="Entrega, pagamento, nota fiscal…"
-          />
-        </label>
+            <footer className="space-y-3 border-t border-ink/6 bg-cloud/40 px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <FormMessage message={error} />
+              {unpriced && <p className="text-[12.5px] text-mist">Itens sem preço entram com valor a confirmar.</p>}
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-[12px] text-mist">Subtotal</p>
+                  <p className="text-2xl font-bold tabular-nums">{formatPrice(subtotal)}</p>
+                </div>
+                <Button type="button" variant="dark" className="h-12 px-8" pending={pending} onClick={submit}>
+                  Criar pedido
+                </Button>
+              </div>
+            </footer>
+          </motion.section>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
-        <FormMessage message={error} />
+export function OrderBuilder({ products }: { products: OrderProduct[] }) {
+  const [quantities, setQuantities] = useState<Quantities>({});
+  const [open, setOpen] = useState(false);
 
-        <Button type="button" variant="dark" className="h-12 w-full" pending={pending} onClick={submit}>
-          Criar pedido
-        </Button>
-        <p className="text-[12px] leading-relaxed text-mist">
-          Os preços são conferidos no sistema ao salvar. O pedido entra como “Em atendimento” e fica no histórico do
-          cliente.
-        </p>
-      </Card>
+  const lines: Line[] = products.flatMap((product) =>
+    product.variants
+      .filter((variant) => quantities[variant.id])
+      .map((variant) => ({ product, variant, quantity: quantities[variant.id] })),
+  );
+  const units = lines.reduce((sum, line) => sum + line.quantity, 0);
+  const subtotal = lines.reduce((sum, line) => sum + (line.variant.price ?? 0) * line.quantity, 0);
+
+  const setQuantity = (variantId: string, quantity: number) =>
+    setQuantities((current) => {
+      const next = { ...current };
+      if (quantity <= 0) delete next[variantId];
+      else next[variantId] = Math.min(999, quantity);
+      return next;
+    });
+
+  return (
+    <div className="pb-24">
+      <Catalog
+        products={products}
+        quantities={quantities}
+        setQuantity={setQuantity}
+        summary={{ units, subtotal, open: () => setOpen(true) }}
+      />
 
       <AnimatePresence>
-        {lines.length > 0 && (
-          <motion.a
-            href="#resumo"
+        {lines.length > 0 && !open && (
+          <motion.button
+            type="button"
+            onClick={() => setOpen(true)}
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className="fixed inset-x-4 bottom-4 z-40 flex items-center gap-4 rounded-2xl bg-navy px-5 py-3.5 text-white shadow-[0_20px_40px_-16px_rgba(27,42,120,0.8)] min-[1140px]:hidden"
+            className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-xl items-center gap-4 rounded-2xl bg-navy px-5 py-3.5 text-left text-white shadow-[0_20px_40px_-16px_rgba(27,42,120,0.8)] lg:left-[calc(248px+2.25rem)]"
           >
-            <ShoppingBag className="size-5" />
+            <ShoppingBag className="size-5 shrink-0" />
             <span className="flex-1 text-[14px]">
               <span className="font-semibold">{units} un.</span>
-              <span className="text-white/70"> · {lines.length} rótulos</span>
+              <span className="text-white/70">
+                {" "}
+                · {lines.length} {lines.length === 1 ? "rótulo" : "rótulos"}
+              </span>
             </span>
             <span className="text-[16px] font-bold tabular-nums">{formatPrice(subtotal)}</span>
-            <span className="inline-flex items-center gap-1 text-[13px] font-medium text-white/80">
-              Ver pedido <ArrowDown className="size-4" />
-            </span>
-          </motion.a>
+            <span className="rounded-xl bg-white/15 px-3 py-1.5 text-[13px] font-semibold">Revisar pedido</span>
+          </motion.button>
         )}
       </AnimatePresence>
+
+      <OrderDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        lines={lines}
+        units={units}
+        subtotal={subtotal}
+        setQuantity={setQuantity}
+      />
     </div>
   );
 }

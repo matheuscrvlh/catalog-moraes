@@ -20,7 +20,7 @@ export default function NewOrderPage() {
       </Link>
       <PageHeader
         title="Novo pedido"
-        description="Navegue pelo catálogo com o cliente e monte o pedido. Ele aparece na conta da empresa e segue o mesmo fluxo de atendimento."
+        description="Navegue pelo catálogo com o cliente, adicione os vinhos e finalize em Pedido."
       />
       <Suspense fallback={<PanelSkeleton />}>
         <Builder />

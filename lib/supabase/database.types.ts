@@ -115,6 +115,64 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"order_events": {
+                  Row: {
+                    "author_id": string | null,"body": string | null,"created_at": string,"from_status": Database["public"]['Enums']["order_status"] | null,"id": string,"kind": Database["public"]['Enums']["order_event_kind"],"order_id": string,"to_status": Database["public"]['Enums']["order_status"] | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string | null,"body"?: string | null,"created_at"?: string,"from_status"?: Database["public"]['Enums']["order_status"] | null,"id"?: string,"kind": Database["public"]['Enums']["order_event_kind"],"order_id": string,"to_status"?: Database["public"]['Enums']["order_status"] | null
+                  }
+                  Update: {
+                    "author_id"?: string | null,"body"?: string | null,"created_at"?: string,"from_status"?: Database["public"]['Enums']["order_status"] | null,"id"?: string,"kind"?: Database["public"]['Enums']["order_event_kind"],"order_id"?: string,"to_status"?: Database["public"]['Enums']["order_status"] | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "order_events_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "customer_summaries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_events_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_events_order_id_fkey"
+      columns: ["order_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"order_files": {
+                  Row: {
+                    "created_at": string,"event_id": string,"id": string,"mime_type": string,"name": string,"order_id": string,"path": string,"size_bytes": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"event_id": string,"id"?: string,"mime_type": string,"name": string,"order_id": string,"path": string,"size_bytes": number
+                  }
+                  Update: {
+                    "created_at"?: string,"event_id"?: string,"id"?: string,"mime_type"?: string,"name"?: string,"order_id"?: string,"path"?: string,"size_bytes"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "order_files_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "order_events"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_files_order_id_fkey"
+      columns: ["order_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"order_items": {
                   Row: {
                     "id": string,"line_total": number | null,"order_id": string,"product_id": string | null,"product_name": string,"quantity": number,"unit_price": number | null,"variant_id": string | null,"variant_label": string
@@ -463,7 +521,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "business_type": "adega"|"mercado"|"vinicola"|"restaurante"|"distribuidor"|"outro","order_status": "novo"|"em_atendimento"|"confirmado"|"entregue"|"cancelado","wine_sweetness": "seco"|"meio_seco"|"suave"|"doce"|"brut"|"extra_brut"|"demi_sec"|"nature"
+            "business_type": "adega"|"mercado"|"vinicola"|"restaurante"|"distribuidor"|"outro","order_event_kind": "created"|"status"|"comment","order_status": "novo"|"confirmado"|"em_rota"|"entregue"|"cancelado","wine_sweetness": "seco"|"meio_seco"|"suave"|"doce"|"brut"|"extra_brut"|"demi_sec"|"nature"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -583,7 +641,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "business_type": ["adega", "mercado", "vinicola", "restaurante", "distribuidor", "outro"],"order_status": ["novo", "em_atendimento", "confirmado", "entregue", "cancelado"],"wine_sweetness": ["seco", "meio_seco", "suave", "doce", "brut", "extra_brut", "demi_sec", "nature"]
+            "business_type": ["adega", "mercado", "vinicola", "restaurante", "distribuidor", "outro"],"order_event_kind": ["created", "status", "comment"],"order_status": ["novo", "confirmado", "em_rota", "entregue", "cancelado"],"wine_sweetness": ["seco", "meio_seco", "suave", "doce", "brut", "extra_brut", "demi_sec", "nature"]
           }
         }
 } as const
