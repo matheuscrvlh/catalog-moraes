@@ -36,7 +36,7 @@ erDiagram
 | `product_images` | Galeria | `path` aceita caminho local (`/products/x.webp`) ou URL do Storage |
 | `banners` | Carrossel da home | Janela de exibição opcional (`starts_at`/`ends_at`) e tema visual |
 | `favorites` | Lista de desejos do cliente | Chave composta usuário + produto |
-| `orders` / `order_items` | Pedidos enviados pelo catálogo | Número sequencial a partir de 1001. Guarda a empresa (`customer_company`) e, nos itens, nome e preço do momento da compra |
+| `orders` / `order_items` | Pedidos da loja ou criados pela equipe (`created_by`) | Número sequencial a partir de 1001. Guarda a empresa (`customer_company`) e, nos itens, nome e preço do momento da compra |
 | `product_views` | Visitas por produto por dia | Agregado (uma linha por produto/dia) para não crescer sem controle |
 | `store_settings` | Dados da loja (WhatsApp, telefone, Instagram) e preferências da plataforma (`show_prices`) | Linha única (`id = 1`) |
 | `audit_logs` | Histórico de alterações do painel | Preenchido por triggers, somente leitura para a aplicação |
@@ -67,7 +67,7 @@ Cargos criados na instalação: **Administrador** (`*`, sistema), **Gerente**, *
 - `has_permission(text)` e `is_staff()` são `security definer` e usadas em todas as policies.
 - Público (anon) lê apenas produtos, categorias, vinícolas e banners ativos.
 - Cliente lê só o próprio perfil, os próprios pedidos e favoritos.
-- Pedido só é criado pela função `place_order`, que recalcula preço no banco, valida disponibilidade e limita 10 pedidos/hora por cliente. Não existe `insert` direto em `orders`.
+- Pedido só é criado pelas funções `place_order` (cliente) e `admin_create_order` (equipe com `orders.manage`). As duas usam `fill_order_items`, que recalcula o preço no banco e valida a disponibilidade; `place_order` ainda limita 10 pedidos/hora por cliente. Não existe `insert` direto em `orders`.
 - Troca de cargo só pela função `admin_update_member`: exige `users.manage`, impede alterar o próprio acesso, impede conceder `*` sem ser administrador e garante ao menos um administrador ativo.
 - Apenas administradores criam cargos com `*` (trigger `guard_role_escalation`).
 - Upload no bucket `catalog` exige `products.manage` ou `catalog.manage`; leitura é pública.
@@ -78,6 +78,7 @@ Cargos criados na instalação: **Administrador** (`*`, sistema), **Gerente**, *
 | Função | Uso |
 | --- | --- |
 | `place_order(items jsonb, notes text)` | Cria pedido a partir da sacola. `items = [{ variant_id, quantity }]` |
+| `admin_create_order(customer uuid, items jsonb, notes text)` | Pedido montado pela equipe para um cliente; entra como `em_atendimento` |
 | `track_product_view(product uuid)` | Soma uma visita ao produto no dia |
 | `dashboard_metrics(period_days int)` | Todas as métricas do dashboard em um JSON: KPIs com período anterior, série diária, receita por dia da semana (atual × anterior), garrafas por estilo, origem dos vinhos vendidos, status, mais vendidos, mapa do estoque, mapa de calor por dia/hora, pedidos recentes e atividade |
 | `admin_update_member(target, new_role, is_active)` | Altera cargo/ativação de um membro |

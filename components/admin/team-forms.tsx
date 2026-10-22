@@ -225,18 +225,21 @@ type Settings = {
 
 export function SettingsForm({ settings }: { settings: Settings }) {
   return (
-    <ActionForm action={saveSettings} submitLabel="Salvar configurações" className="max-w-2xl space-y-5">
+    <ActionForm action={saveSettings} submitLabel="Salvar contato" className="space-y-5">
       {(errors) => (
         <>
-          <Field tone="light" label="Nome da loja" error={errors.storeName}>
-            <Input tone="light" name="storeName" defaultValue={settings.store_name} />
-          </Field>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-x-5 gap-y-5 md:grid-cols-2">
+            <Field tone="light" label="Nome da loja" error={errors.storeName}>
+              <Input tone="light" name="storeName" defaultValue={settings.store_name} />
+            </Field>
+            <Field tone="light" label="E-mail" error={errors.email}>
+              <Input tone="light" name="email" type="email" defaultValue={settings.email ?? ""} />
+            </Field>
             <Field
               tone="light"
-              label="WhatsApp de pedidos"
+              label="WhatsApp de atendimento"
               error={errors.whatsapp}
-              hint="DDI + DDD + número. Recebe os pedidos do site."
+              hint="DDI + DDD + número. Usado nos botões de contato do site."
             >
               <Input
                 tone="light"
@@ -249,10 +252,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
             <Field tone="light" label="Telefone" error={errors.phone}>
               <Input tone="light" name="phone" defaultValue={settings.phone ?? ""} placeholder="(22) 2779-4940" />
             </Field>
-            <Field tone="light" label="E-mail" error={errors.email}>
-              <Input tone="light" name="email" type="email" defaultValue={settings.email ?? ""} />
-            </Field>
-            <Field tone="light" label="Instagram" error={errors.instagram}>
+            <Field tone="light" label="Instagram" error={errors.instagram} hint="Só o usuário, sem @.">
               <Input
                 tone="light"
                 name="instagram"
@@ -260,12 +260,12 @@ export function SettingsForm({ settings }: { settings: Settings }) {
                 placeholder="moraescomercialoficial"
               />
             </Field>
+            <Field tone="light" label="Endereço" error={errors.address}>
+              <Input tone="light" name="address" defaultValue={settings.address ?? ""} />
+            </Field>
           </div>
-          <Field tone="light" label="Endereço" error={errors.address}>
-            <Input tone="light" name="address" defaultValue={settings.address ?? ""} />
-          </Field>
           <Field tone="light" label="Sobre a loja" error={errors.about} hint="Aparece no rodapé do site.">
-            <Textarea tone="light" name="about" defaultValue={settings.about ?? ""} maxLength={400} />
+            <Textarea tone="light" name="about" defaultValue={settings.about ?? ""} maxLength={400} rows={4} />
           </Field>
         </>
       )}

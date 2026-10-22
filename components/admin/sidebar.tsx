@@ -26,7 +26,7 @@ import {
 import { Logo } from "@/components/brand/brand-mark";
 import { signOut } from "@/lib/auth/actions";
 import { cn } from "@/lib/cn";
-import { initials } from "@/lib/text";
+import { initials, stripAccents } from "@/lib/text";
 import type { NavItem, NavKey } from "@/lib/admin/nav";
 
 const ICONS: Record<NavKey, LucideIcon> = {
@@ -47,7 +47,6 @@ type Props = {
   pendingOrders: number;
   activeProducts: number;
   user: { name: string; email: string; role: string };
-  canSearchProducts: boolean;
   canSeeOrders: boolean;
 };
 
@@ -85,30 +84,58 @@ function GlassArt() {
   );
 }
 
-function ProductSearch({ onNavigate }: { onNavigate?: () => void }) {
-  const router = useRouter();
+const normalize = (value: string) => stripAccents(value).toLowerCase();
 
+function score(item: NavItem, group: string, words: string[]) {
+  const label = normalize(item.label);
+  const rest = normalize(`${group} ${item.keywords ?? ""}`);
+  if (!words.every((word) => label.includes(word) || rest.includes(word))) return 0;
+  return words.every((word) => label.includes(word)) ? 2 : 1;
+}
+
+function filterNav(groups: Props["groups"], query: string) {
+  const words = normalize(query).split(/\s+/).filter(Boolean);
+  if (!words.length) return { groups, best: null };
+
+  const ranked = groups.map((group) => ({
+    group,
+    items: group.items.map((item) => ({ item, score: score(item, group.group, words) })).filter((entry) => entry.score),
+  }));
+  const best = ranked.flatMap((entry) => entry.items).sort((a, b) => b.score - a.score)[0]?.item ?? null;
+  const visible = ranked
+    .filter((entry) => entry.items.length)
+    .map((entry) => ({ ...entry.group, items: entry.items.map(({ item }) => item) }));
+  return { groups: visible, best };
+}
+
+function ScreenSearch({
+  value,
+  onChange,
+  onSubmit,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
   return (
-    <form
-      role="search"
-      onSubmit={(event) => {
-        event.preventDefault();
-        const term = new FormData(event.currentTarget).get("q")?.toString().trim();
-        if (!term) return;
-        router.push(`/admin/produtos?q=${encodeURIComponent(term)}`);
-        onNavigate?.();
-      }}
-      className="relative mb-4"
-    >
+    <div role="search" className="relative mb-4">
       <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-mist" />
       <input
-        name="q"
         type="search"
-        placeholder="Buscar produto…"
-        aria-label="Buscar produto"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            onSubmit();
+          }
+          if (event.key === "Escape") onChange("");
+        }}
+        placeholder="Ir para…"
+        aria-label="Buscar tela do painel"
         className="h-10 w-full rounded-2xl bg-cloud pr-3 pl-10 text-[13.5px] text-ink transition outline-none placeholder:text-mist focus:bg-white focus:ring-2 focus:ring-royal/25"
       />
-    </form>
+    </div>
   );
 }
 
@@ -164,8 +191,11 @@ function UserPanel({ user, pendingOrders, canSeeOrders, onNavigate }: Props & { 
 }
 
 function NavContent(props: Props & { onNavigate?: () => void }) {
-  const { groups, pendingOrders, activeProducts, canSearchProducts, onNavigate } = props;
+  const { groups, pendingOrders, activeProducts, onNavigate } = props;
   const pathname = usePathname();
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const { groups: visible, best } = filterNav(groups, query);
 
   return (
     <div className="flex h-full flex-col">
@@ -173,10 +203,20 @@ function NavContent(props: Props & { onNavigate?: () => void }) {
         <Logo tone="light" />
       </Link>
 
-      {canSearchProducts && <ProductSearch onNavigate={onNavigate} />}
+      <ScreenSearch
+        value={query}
+        onChange={setQuery}
+        onSubmit={() => {
+          if (!best) return;
+          router.push(best.href);
+          setQuery("");
+          onNavigate?.();
+        }}
+      />
 
       <nav className="min-h-0 flex-1 scrollbar-none space-y-3.5 overflow-y-auto" aria-label="Painel">
-        {groups.map((group) => (
+        {!visible.length && <p className="px-3 py-2 text-[13px] text-mist">Nenhuma tela encontrada.</p>}
+        {visible.map((group) => (
           <div key={group.group}>
             <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-[0.12em] text-mist uppercase">{group.group}</p>
             <ul className="space-y-0.5">
@@ -188,7 +228,10 @@ function NavContent(props: Props & { onNavigate?: () => void }) {
                     <Link
                       href={item.href}
                       ref={active ? revealActive : undefined}
-                      onClick={onNavigate}
+                      onClick={() => {
+                        setQuery("");
+                        onNavigate?.();
+                      }}
                       className={cn(
                         "relative flex items-center gap-3 rounded-2xl px-3.5 py-[7px] text-[14px] font-medium transition",
                         active ? "text-white" : "text-ink/60 hover:bg-cloud hover:text-ink",

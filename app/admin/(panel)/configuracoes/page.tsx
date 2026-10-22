@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
-import { CircleDollarSign } from "lucide-react";
+import { CircleDollarSign, Contact, Store, type LucideIcon } from "lucide-react";
 import { ActionSwitch } from "@/components/admin/controls";
 import { SettingsForm } from "@/components/admin/team-forms";
-import { Card, CardTitle, PageHeader, PanelSkeleton } from "@/components/admin/ui";
+import { Card, PageHeader, PanelSkeleton } from "@/components/admin/ui";
 import { setStorePrices } from "@/lib/admin/team-actions";
 import { requireStaff } from "@/lib/auth/viewer";
 import { createClient } from "@/lib/supabase/server";
@@ -32,9 +32,8 @@ async function Settings() {
   if (!settings) return null;
 
   return (
-    <div className="max-w-4xl space-y-5">
-      <Card className="p-6 md:p-8">
-        <CardTitle title="Loja" description="Como o catálogo aparece para os clientes." />
+    <div className="space-y-5">
+      <Section icon={Store} title="Loja" description="Como o catálogo aparece para os clientes.">
         <Preference
           icon={<CircleDollarSign className="size-5" strokeWidth={1.8} />}
           title="Exibir preços dos vinhos"
@@ -42,13 +41,41 @@ async function Settings() {
         >
           <ActionSwitch checked={settings.show_prices} label="Exibir preços dos vinhos" action={setStorePrices} />
         </Preference>
-      </Card>
+      </Section>
 
-      <Card className="p-6 md:p-8">
-        <CardTitle title="Contato" description="Dados exibidos no site e usados para receber os pedidos." />
+      <Section
+        icon={Contact}
+        title="Contato"
+        description="Dados exibidos no rodapé, na barra do topo e nos botões de atendimento do site."
+      >
         <SettingsForm settings={settings} />
-      </Card>
+      </Section>
     </div>
+  );
+}
+
+function Section({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card className="grid gap-6 p-6 md:p-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12">
+      <div>
+        <span className="flex size-10 items-center justify-center rounded-2xl bg-navy text-white">
+          <Icon className="size-[18px]" strokeWidth={1.8} />
+        </span>
+        <h2 className="mt-4 text-[17px] font-bold text-ink">{title}</h2>
+        <p className="mt-1 text-[13px] leading-relaxed text-mist">{description}</p>
+      </div>
+      <div className="min-w-0">{children}</div>
+    </Card>
   );
 }
 

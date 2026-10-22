@@ -13,8 +13,7 @@ const orderSchema = z.object({
 });
 
 export type PlaceOrderResult =
-  | { ok: true; number: number; company: string | null }
-  | { ok: false; reason: "auth" | "invalid" | "error"; message: string };
+  { ok: true; number: number } | { ok: false; reason: "auth" | "invalid" | "error"; message: string };
 
 export async function placeOrder(input: z.input<typeof orderSchema>): Promise<PlaceOrderResult> {
   const viewer = await getViewer();
@@ -39,5 +38,5 @@ export async function placeOrder(input: z.input<typeof orderSchema>): Promise<Pl
     return { ok: false, reason: "error", message: known ? error.message : "Não foi possível enviar o pedido agora." };
   }
 
-  return { ok: true, number: data[0].order_number, company: viewer.companyName };
+  return { ok: true, number: data[0].order_number };
 }

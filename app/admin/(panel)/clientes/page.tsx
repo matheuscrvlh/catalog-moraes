@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import Link from "next/link";
+import { CustomerSheet } from "@/components/admin/customer-sheet";
 import { EmptyState, PageHeader, PanelSkeleton, table } from "@/components/admin/ui";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
-import { requireStaff } from "@/lib/auth/viewer";
+import { can, requireStaff } from "@/lib/auth/viewer";
 import { cn } from "@/lib/cn";
 import { BUSINESS_TYPES, formatDay, formatPrice, formatRelative, formatTaxId, whatsappLink } from "@/lib/format";
 import { initials } from "@/lib/text";
@@ -25,7 +26,7 @@ export default function CustomersPage({ searchParams }: PageProps<"/admin/client
       <PageHeader
         eyebrow="Vendas"
         title="Clientes"
-        description="Empresas cadastradas no catálogo, com histórico de pedidos e valor comprado."
+        description="Empresas cadastradas na loja ou pela equipe, com histórico de pedidos e valor comprado."
       />
       <Suspense fallback={<PanelSkeleton />}>
         <CustomersTable searchParams={searchParams} />
@@ -35,7 +36,7 @@ export default function CustomersPage({ searchParams }: PageProps<"/admin/client
 }
 
 async function CustomersTable({ searchParams }: { searchParams: PageProps<"/admin/clientes">["searchParams"] }) {
-  await requireStaff("customers.view");
+  const viewer = await requireStaff("customers.view");
   const search = await searchParams;
   const pick = (key: string) => {
     const value = search[key];
@@ -78,7 +79,7 @@ async function CustomersTable({ searchParams }: { searchParams: PageProps<"/admi
             className="h-11 w-full rounded-full border border-ink/10 bg-white pr-4 pl-11 text-sm outline-none focus:border-royal"
           />
         </form>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {(Object.keys(SORTS) as (keyof typeof SORTS)[]).map((key) => (
             <Link
               key={key}
@@ -91,6 +92,11 @@ async function CustomersTable({ searchParams }: { searchParams: PageProps<"/admi
               {SORTS[key].label}
             </Link>
           ))}
+          {can(viewer, "orders.manage") && (
+            <span className="ml-2">
+              <CustomerSheet />
+            </span>
+          )}
         </div>
       </div>
 

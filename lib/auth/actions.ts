@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { landingFor } from "@/lib/admin/nav";
 import { env } from "@/lib/env";
-import { BUSINESS_TYPES, type BusinessType } from "@/lib/format";
+import { companySchema } from "@/lib/customers/schema";
 import { fieldErrors, formText, safeRedirectPath, type FormState } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,20 +13,7 @@ const credentials = z.object({
   password: z.string().min(1, "Informe a senha").max(72),
 });
 
-const signUpSchema = z.object({
-  companyName: z.string().trim().min(2, "Informe o nome da empresa").max(120),
-  taxId: z
-    .string()
-    .transform((value) => value.replace(/\D/g, ""))
-    .refine((value) => value.length === 14 || value.length === 11, "Informe um CNPJ (ou CPF) válido"),
-  businessType: z.enum(Object.keys(BUSINESS_TYPES) as [BusinessType, ...BusinessType[]], {
-    error: "Escolha o tipo de negócio",
-  }),
-  fullName: z.string().trim().min(3, "Informe o nome do responsável").max(120),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^[\d\s()+-]{10,20}$/, "Informe um telefone com DDD"),
+const signUpSchema = companySchema.extend({
   email: z.email("Informe um e-mail válido").max(160),
   password: z.string().min(8, "A senha precisa ter ao menos 8 caracteres").max(72),
 });

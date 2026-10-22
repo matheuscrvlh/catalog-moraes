@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 import { Badge, EmptyState, PageHeader, PanelSkeleton, table } from "@/components/admin/ui";
+import { ButtonLink } from "@/components/ui/button";
 import { requireStaff } from "@/lib/auth/viewer";
 import { cn } from "@/lib/cn";
 import { formatDateTime, formatPrice, ORDER_STATUS, type OrderStatus } from "@/lib/format";
@@ -18,7 +19,12 @@ export default function OrdersPage({ searchParams }: PageProps<"/admin/pedidos">
       <PageHeader
         eyebrow="Vendas"
         title="Pedidos"
-        description="Pedidos enviados pela sacola do site. Atualize o status conforme o atendimento."
+        description="Pedidos enviados pela loja ou montados pela equipe. Atualize o status conforme o atendimento."
+        actions={
+          <ButtonLink href="/admin/pedidos/novo" variant="dark">
+            <Plus className="size-4" /> Novo pedido
+          </ButtonLink>
+        }
       />
       <Suspense fallback={<PanelSkeleton />}>
         <OrdersTable searchParams={searchParams} />
@@ -49,7 +55,7 @@ async function OrdersTable({ searchParams }: { searchParams: PageProps<"/admin/p
   let query = supabase
     .from("orders")
     .select(
-      "id, number, customer_name, customer_company, customer_phone, status, subtotal, created_at, order_items(quantity)",
+      "id, number, customer_name, customer_company, customer_phone, status, subtotal, created_at, created_by, order_items(quantity)",
       {
         count: "exact",
       },
@@ -115,7 +121,7 @@ async function OrdersTable({ searchParams }: { searchParams: PageProps<"/admin/p
       </div>
 
       {!orders?.length ? (
-        <EmptyState title="Nenhum pedido" description="Os pedidos feitos pelo site aparecem aqui." />
+        <EmptyState title="Nenhum pedido" description="Os pedidos da loja e os criados pela equipe aparecem aqui." />
       ) : (
         <div className={table.wrap}>
           <table className={table.table}>
@@ -136,7 +142,9 @@ async function OrdersTable({ searchParams }: { searchParams: PageProps<"/admin/p
                     <Link href={`/admin/pedidos/${order.id}`} className="font-mono font-medium hover:text-royal">
                       #{order.number}
                     </Link>
-                    <span className="block text-xs text-ink/45">{formatDateTime(order.created_at)}</span>
+                    <span className="block text-xs text-ink/45">
+                      {formatDateTime(order.created_at)} · {order.created_by ? "Equipe" : "Loja"}
+                    </span>
                   </td>
                   <td className={table.td}>
                     <span className="block font-medium">{order.customer_company ?? order.customer_name}</span>

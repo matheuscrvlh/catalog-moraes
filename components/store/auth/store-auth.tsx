@@ -49,7 +49,7 @@ export function StoreAuth({ title, subtitle, children }: { title: ReactNode; sub
         />
         <div className="absolute inset-0 -z-10 bg-linear-to-br from-black/50 via-black/10 to-black/30" />
         <AuthShowcase
-          quote="Monte o pedido da sua empresa pelo catálogo e finalize com o vendedor, com preço de distribuidora."
+          quote="Monte o pedido da sua empresa pelo catálogo e envie direto para a nossa equipe comercial."
           quoteAuthor="Moraes Comercial"
           badge={{ title: "Mais de 100 rótulos", subtitle: "nacionais e importados", thumbs: THUMBS }}
         />

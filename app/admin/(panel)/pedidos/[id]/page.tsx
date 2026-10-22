@@ -34,6 +34,7 @@ async function OrderDetail({ params }: { params: PageProps<"/admin/pedidos/[id]"
       `id, number, status, subtotal, notes, internal_notes, customer_name, customer_company, customer_phone, created_at, updated_at, customer_id,
        customer:profiles!orders_customer_id_fkey(email),
        handler:profiles!orders_handled_by_fkey(full_name),
+       creator:profiles!orders_created_by_fkey(full_name),
        order_items(id, product_id, product_name, variant_label, unit_price, quantity, line_total)`,
     )
     .eq("id", id)
@@ -59,7 +60,7 @@ async function OrderDetail({ params }: { params: PageProps<"/admin/pedidos/[id]"
         <ArrowLeft className="size-4" /> Pedidos
       </Link>
       <PageHeader
-        eyebrow={formatDateTime(order.created_at)}
+        eyebrow={`${formatDateTime(order.created_at)} · ${order.creator ? `Criado por ${order.creator.full_name}` : "Enviado pela loja"}`}
         title={`Pedido #${order.number}`}
         actions={<Badge tone={status.tone}>{status.label}</Badge>}
       />

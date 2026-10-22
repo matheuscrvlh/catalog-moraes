@@ -4,41 +4,23 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, Check, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Send, ShieldCheck, Trash2 } from "lucide-react";
 import { placeOrder } from "@/lib/orders/actions";
-import { formatPrice, whatsappLink } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import { ButtonLink } from "@/components/ui/button";
 import { FormMessage, Textarea } from "@/components/ui/field";
-import { WhatsappIcon } from "@/components/ui/brand-icons";
 import { BottleImage } from "../bottle-image";
 import { QuantityStepper } from "../quantity-stepper";
-import { useCart, type CartItem } from "../providers/cart";
+import { useCart } from "../providers/cart";
 import { useSession } from "../providers/session";
 
-function orderMessage(number: number, company: string | null, items: CartItem[], subtotal: number, notes: string) {
-  const lines = items.map(
-    (item) =>
-      `• ${item.quantity}x ${item.name} (${item.label})${item.price != null ? ` — ${formatPrice(item.price * item.quantity)}` : ""}`,
-  );
-  return [
-    `Olá! ${company ? `Aqui é da ${company}. ` : ""}Acabei de enviar o pedido #${number} pelo catálogo:`,
-    "",
-    ...lines,
-    "",
-    subtotal > 0 ? `Subtotal estimado: ${formatPrice(subtotal)}` : null,
-    notes ? `Observações: ${notes}` : null,
-  ]
-    .filter((line) => line !== null)
-    .join("\n");
-}
-
-export function BagView({ storeWhatsapp }: { storeWhatsapp: string | null }) {
+export function BagView() {
   const { items, ready, update, remove, subtotal, hasPriced, hasUnpriced, clear, count } = useCart();
   const { user } = useSession();
   const router = useRouter();
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [placed, setPlaced] = useState<{ number: number; link: string | null } | null>(null);
+  const [placed, setPlaced] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
 
   const submit = () => {
@@ -53,10 +35,8 @@ export function BagView({ storeWhatsapp }: { storeWhatsapp: string | null }) {
         else setError(result.message);
         return;
       }
-      const link = whatsappLink(storeWhatsapp, orderMessage(result.number, result.company, items, subtotal, notes));
-      setPlaced({ number: result.number, link });
+      setPlaced(result.number);
       clear();
-      if (link) window.open(link, "_blank", "noopener");
     });
   };
 
@@ -71,23 +51,16 @@ export function BagView({ storeWhatsapp }: { storeWhatsapp: string | null }) {
           <Check className="size-7" />
         </span>
         <p className="mt-6 font-script text-4xl text-bronze">Pedido recebido</p>
-        <h2 className="caps mt-1 text-5xl text-navy">Nº {placed.number}</h2>
+        <h2 className="caps mt-1 text-5xl text-navy">Nº {placed}</h2>
         <p className="mx-auto mt-5 max-w-sm text-stone">
-          O vendedor vai confirmar valores, prazo e entrega. Se o WhatsApp não abriu, toque abaixo para enviar o resumo.
+          Nossa equipe comercial já recebeu o pedido e vai entrar em contato para confirmar valores, frete e prazo.
         </p>
         <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-          {placed.link && (
-            <a
-              href={placed.link}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-12 items-center justify-center gap-2.5 bg-[#1fae5b] px-7 text-[12px] font-medium tracking-[0.18em] text-white uppercase"
-            >
-              <WhatsappIcon className="size-4" /> Enviar no WhatsApp
-            </a>
-          )}
-          <ButtonLink href="/conta" variant="outline" size="lg">
+          <ButtonLink href="/conta" size="lg">
             Acompanhar pedido
+          </ButtonLink>
+          <ButtonLink href="/vinhos" variant="outline" size="lg">
+            Continuar no catálogo
           </ButtonLink>
         </div>
       </motion.div>
@@ -210,8 +183,8 @@ export function BagView({ storeWhatsapp }: { storeWhatsapp: string | null }) {
           disabled={!ready || items.length === 0 || pending}
           className="flex h-13 w-full items-center justify-center gap-2.5 bg-navy text-[12px] font-medium tracking-[0.2em] text-white uppercase transition hover:bg-navy-900 disabled:opacity-60"
         >
-          <WhatsappIcon className="size-4" />
-          {pending ? "Enviando…" : user ? "Enviar pedido ao vendedor" : "Entrar e enviar pedido"}
+          <Send className="size-4" />
+          {pending ? "Enviando…" : user ? "Enviar pedido" : "Entrar e enviar pedido"}
         </button>
         <p className="flex items-start gap-2 text-xs leading-relaxed text-stone">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-navy" />

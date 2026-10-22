@@ -161,17 +161,29 @@ isOneToOne: false
                   ]
                 },"orders": {
                   Row: {
-                    "created_at": string,"customer_company": string | null,"customer_id": string | null,"customer_name": string,"customer_phone": string | null,"handled_by": string | null,"id": string,"internal_notes": string | null,"notes": string | null,"number": number,"status": Database["public"]['Enums']["order_status"],"subtotal": number,"updated_at": string
+                    "created_at": string,"created_by": string | null,"customer_company": string | null,"customer_id": string | null,"customer_name": string,"customer_phone": string | null,"handled_by": string | null,"id": string,"internal_notes": string | null,"notes": string | null,"number": number,"status": Database["public"]['Enums']["order_status"],"subtotal": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"customer_company"?: string | null,"customer_id"?: string | null,"customer_name": string,"customer_phone"?: string | null,"handled_by"?: string | null,"id"?: string,"internal_notes"?: string | null,"notes"?: string | null,"number"?: never,"status"?: Database["public"]['Enums']["order_status"],"subtotal"?: number,"updated_at"?: string
+                    "created_at"?: string,"created_by"?: string | null,"customer_company"?: string | null,"customer_id"?: string | null,"customer_name": string,"customer_phone"?: string | null,"handled_by"?: string | null,"id"?: string,"internal_notes"?: string | null,"notes"?: string | null,"number"?: never,"status"?: Database["public"]['Enums']["order_status"],"subtotal"?: number,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"customer_company"?: string | null,"customer_id"?: string | null,"customer_name"?: string,"customer_phone"?: string | null,"handled_by"?: string | null,"id"?: string,"internal_notes"?: string | null,"notes"?: string | null,"number"?: never,"status"?: Database["public"]['Enums']["order_status"],"subtotal"?: number,"updated_at"?: string
+                    "created_at"?: string,"created_by"?: string | null,"customer_company"?: string | null,"customer_id"?: string | null,"customer_name"?: string,"customer_phone"?: string | null,"handled_by"?: string | null,"id"?: string,"internal_notes"?: string | null,"notes"?: string | null,"number"?: never,"status"?: Database["public"]['Enums']["order_status"],"subtotal"?: number,"updated_at"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "orders_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "customer_summaries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "orders_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "orders_customer_id_fkey"
       columns: ["customer_id"]
 isOneToOne: false
@@ -412,6 +424,11 @@ isOneToOne: false
             "admin_adjust_stock":
 { Args: { "quantity": number,"variant": string }; Returns: number
                            },
+"admin_create_order":
+{ Args: { "customer": string,"items": Json,"notes"?: string }; Returns: {
+              "order_id": string,"order_number": number
+            }[]
+                           },
 "admin_save_product":
 { Args: { "payload": Json }; Returns: string
                            },
@@ -420,6 +437,9 @@ isOneToOne: false
                            },
 "dashboard_metrics":
 { Args: { "period_days"?: number }; Returns: Json
+                           },
+"fill_order_items":
+{ Args: { "items": Json,"target": string }; Returns: number
                            },
 "has_permission":
 { Args: { "permission": string }; Returns: boolean

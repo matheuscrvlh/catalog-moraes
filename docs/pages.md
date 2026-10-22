@@ -91,7 +91,7 @@ Filtros vivem na URL (`?categoria=tintos&pais=Chile&uva=Malbec&doçura=seco&orde
 
 ### Sacola `/sacola`
 
-Itens, quantidade, observações e total. "Enviar pedido" exige login, grava o pedido (`place_order`) e abre o WhatsApp da loja com o resumo e o número do pedido.
+Itens, quantidade, observações e total. "Enviar pedido" exige login e grava o pedido (`place_order`), que chega direto ao painel com status "Novo". O cliente vê a confirmação com o número e acompanha em Minha conta.
 
 ### Entrar `/entrar` · Cadastro `/cadastro`
 
@@ -125,8 +125,9 @@ Abas: **Pedidos** (histórico com linha do tempo de status), **Favoritos**, **Da
 - **Produtos** `/admin/produtos`: tabela com foto, estilo, vinícola, faixa de preço, barra de estoque e status; busca e filtro por estilo.
 - **Produto** `/admin/produtos/novo` e `/admin/produtos/[id]`: seções (identificação, classificação, perfil sensorial com sliders, serviço, variações em linhas editáveis, imagens com upload) e prévia do card ao vivo.
 - **Categorias**, **Vinícolas**, **Banners**: listas com formulário lateral.
-- **Pedidos** `/admin/pedidos`: abas por status com contagem; detalhe com itens, cliente, troca de status, notas internas e botão para chamar o cliente no WhatsApp.
-- **Clientes** `/admin/clientes`: pedidos, total gasto e último pedido.
+- **Pedidos** `/admin/pedidos`: abas por status com contagem e origem (loja ou equipe); detalhe com itens, cliente, troca de status, notas internas e botão para chamar o cliente no WhatsApp.
+- **Novo pedido** `/admin/pedidos/novo`: o vendedor escolhe o cliente (ou cadastra um novo), busca os vinhos, ajusta quantidades e cria o pedido em nome da empresa (`admin_create_order`). Entra como "Em atendimento".
+- **Clientes** `/admin/clientes`: pedidos, total gasto e último pedido. "Novo cliente" cadastra a empresa; com senha, ela também acessa a loja.
 - **Equipe** `/admin/usuarios`: convidar membro (cria acesso), trocar cargo, desativar.
 - **Cargos** `/admin/cargos`: matriz de permissões por cargo.
 - **Configurações** `/admin/configuracoes`: preferências da plataforma (exibir ou ocultar preços na loja) e dados da loja usados no site e no WhatsApp.

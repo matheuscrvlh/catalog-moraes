@@ -46,7 +46,6 @@ async function Sidebar() {
       pendingOrders={pending ?? 0}
       activeProducts={activeProducts ?? 0}
       user={{ name: viewer.fullName, email: viewer.email, role: viewer.role.name }}
-      canSearchProducts={can(viewer, "products.manage")}
       canSeeOrders={canSeeOrders}
     />
   );

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s · Moraes Comercial",
   },
   description:
-    "Vinhos nacionais e importados com curadoria da Distribuidora Moraes Comercial. Tintos, brancos, rosés e espumantes com atendimento pelo WhatsApp.",
+    "Vinhos nacionais e importados com curadoria da Distribuidora Moraes Comercial. Tintos, brancos, rosés e espumantes com pedidos online para empresas.",
   openGraph: {
     type: "website",
     locale: "pt_BR",

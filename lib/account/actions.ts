@@ -1,27 +1,12 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { z } from "zod";
 import { getViewer } from "@/lib/auth/viewer";
-import { BUSINESS_TYPES, type BusinessType } from "@/lib/format";
+import { companySchema } from "@/lib/customers/schema";
 import { fieldErrors, formText, type FormState } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
 
-const profileSchema = z.object({
-  fullName: z.string().trim().min(3, "Informe o nome do responsável").max(120),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^[\d\s()+-]{10,20}$/, "Informe um telefone com DDD"),
-  companyName: z.string().trim().min(2, "Informe o nome da empresa").max(120),
-  taxId: z
-    .string()
-    .transform((value) => value.replace(/\D/g, ""))
-    .refine((value) => value.length === 14 || value.length === 11, "Informe um CNPJ (ou CPF) válido"),
-  businessType: z.enum(Object.keys(BUSINESS_TYPES) as [BusinessType, ...BusinessType[]], {
-    error: "Escolha o tipo de negócio",
-  }),
-});
+const profileSchema = companySchema;
 
 export async function updateProfile(_: FormState, formData: FormData): Promise<FormState> {
   const viewer = await getViewer();
