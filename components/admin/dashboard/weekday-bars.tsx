@@ -53,7 +53,7 @@ export function WeekdayBars({ data }: { data: DashboardData["weekday"] }) {
             {data.map((day, index) => (
               <div
                 key={day.dow}
-                className="relative flex h-full items-end gap-1.5 px-2"
+                className="relative flex h-full items-end gap-1 px-0.5 sm:gap-1.5 sm:px-2"
                 onPointerEnter={() => setHover(index)}
                 onFocus={() => setHover(index)}
                 tabIndex={0}
@@ -65,7 +65,7 @@ export function WeekdayBars({ data }: { data: DashboardData["weekday"] }) {
                 ].map((bar, position) => (
                   <motion.span
                     key={position}
-                    className="w-[18px] rounded-t-full rounded-b-md"
+                    className="w-2.5 rounded-t-full rounded-b-md sm:w-[18px]"
                     style={{ background: bar.color, opacity: hover === null || hover === index ? 1 : 0.45 }}
                     initial={{ height: 0 }}
                     animate={{ height: height(bar.value) }}
@@ -100,7 +100,7 @@ export function WeekdayBars({ data }: { data: DashboardData["weekday"] }) {
         <span />
         <div className="flex justify-around text-[12px] text-mist">
           {DAYS.map((day) => (
-            <span key={day} className="w-14 text-center">
+            <span key={day} className="w-9 text-center sm:w-14">
               {day}
             </span>
           ))}

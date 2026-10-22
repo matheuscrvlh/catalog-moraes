@@ -24,7 +24,7 @@ type Tab = (typeof TABS)[number]["id"];
 
 export default function AccountPage({ searchParams }: PageProps<"/conta">) {
   return (
-    <div className="mx-auto max-w-7xl px-5 pt-12 pb-32 md:px-8">
+    <div className="mx-auto max-w-7xl px-5 pt-12 pb-32 md:px-8 md:pb-16">
       <Suspense fallback={<div className="skeleton h-40" />}>
         <Account searchParams={searchParams} />
       </Suspense>

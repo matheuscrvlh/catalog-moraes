@@ -105,9 +105,9 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/admin">["
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-5">
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <KpiCard
               primary
               label="Receita confirmada"
@@ -160,7 +160,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/admin">["
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Card className="flex flex-col">
           <TrendChart series={data.series} />
         </Card>
@@ -185,7 +185,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/admin">["
         <CellarMap cellar={data.cellar} />
       </Card>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Card>
           <CardTitle title="Mais vendidos" description={`Garrafas nos últimos ${period} dias`} />
           <Ranking

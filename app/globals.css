@@ -110,6 +110,7 @@
   body {
     font-family: var(--font-sans);
     color: var(--color-ink);
+    overflow-x: clip;
   }
 
   ::selection {
@@ -124,6 +125,14 @@
 
   input[type="number"]::-webkit-inner-spin-button {
     appearance: none;
+  }
+}
+
+@media (max-width: 767px) {
+  input:not([type="checkbox"], [type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 
@@ -144,13 +153,7 @@
   }
 
   .brand-stripe {
-    background: linear-gradient(
-      90deg,
-      #1b2a78 0 25%,
-      #e3262e 25% 50%,
-      #1fa3d6 50% 75%,
-      #4a3a33 75% 100%
-    );
+    background: linear-gradient(90deg, #1b2a78 0 25%, #e3262e 25% 50%, #1fa3d6 50% 75%, #4a3a33 75% 100%);
   }
 
   .skeleton {

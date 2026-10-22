@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
+  Bell,
   Building2,
   ExternalLink,
   Images,
   LayoutDashboard,
+  LogOut,
   Menu,
   Package,
   Receipt,
+  Search,
   Settings2,
   ShieldCheck,
   Tags,
@@ -21,7 +24,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/brand/brand-mark";
+import { signOut } from "@/lib/auth/actions";
 import { cn } from "@/lib/cn";
+import { initials } from "@/lib/text";
 import type { NavItem, NavKey } from "@/lib/admin/nav";
 
 const ICONS: Record<NavKey, LucideIcon> = {
@@ -41,6 +46,9 @@ type Props = {
   groups: { group: string; items: NavItem[] }[];
   pendingOrders: number;
   activeProducts: number;
+  user: { name: string; email: string; role: string };
+  canSearchProducts: boolean;
+  canSeeOrders: boolean;
 };
 
 function isActive(pathname: string, href: string) {
@@ -49,7 +57,7 @@ function isActive(pathname: string, href: string) {
 
 function GlassArt() {
   return (
-    <svg viewBox="0 0 80 110" className="h-24 w-auto" aria-hidden>
+    <svg viewBox="0 0 80 110" className="h-14 w-auto" aria-hidden>
       <defs>
         <linearGradient id="side-wine" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="#ff4b55" />
@@ -75,20 +83,101 @@ function GlassArt() {
   );
 }
 
-function NavContent({ groups, pendingOrders, activeProducts, onNavigate }: Props & { onNavigate?: () => void }) {
+function ProductSearch({ onNavigate }: { onNavigate?: () => void }) {
+  const router = useRouter();
+
+  return (
+    <form
+      role="search"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const term = new FormData(event.currentTarget).get("q")?.toString().trim();
+        if (!term) return;
+        router.push(`/admin/produtos?q=${encodeURIComponent(term)}`);
+        onNavigate?.();
+      }}
+      className="relative mb-4"
+    >
+      <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-mist" />
+      <input
+        name="q"
+        type="search"
+        placeholder="Buscar produto…"
+        aria-label="Buscar produto"
+        className="h-10 w-full rounded-2xl bg-cloud pr-3 pl-10 text-[13.5px] text-ink transition outline-none placeholder:text-mist focus:bg-white focus:ring-2 focus:ring-royal/25"
+      />
+    </form>
+  );
+}
+
+function UserPanel({ user, pendingOrders, canSeeOrders, onNavigate }: Props & { onNavigate?: () => void }) {
+  return (
+    <div className="mt-2.5 rounded-[22px] border border-cloud p-1.5">
+      {canSeeOrders && (
+        <>
+          <Link
+            href="/admin/pedidos?status=novo"
+            onClick={onNavigate}
+            className="flex items-center gap-3 rounded-2xl px-2.5 py-1.5 text-[13.5px] font-medium text-ink/70 transition hover:bg-cloud hover:text-ink"
+          >
+            <span className="relative">
+              <Bell className="size-[18px]" strokeWidth={1.8} />
+              {pendingOrders > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full border border-white bg-red" />
+              )}
+            </span>
+            <span className="flex-1">Notificações</span>
+            {pendingOrders > 0 && (
+              <span className="rounded-full bg-red px-2 py-0.5 text-[10.5px] font-semibold text-white">
+                {pendingOrders}
+              </span>
+            )}
+          </Link>
+          <div className="mx-2 my-1 h-px bg-cloud" />
+        </>
+      )}
+      <div className="flex items-center gap-3 px-1 py-0.5">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-red to-wine text-xs font-bold text-white">
+          {initials(user.name || user.email)}
+        </span>
+        <span className="min-w-0 flex-1" title={user.email}>
+          <span className="block truncate text-[13.5px] leading-tight font-bold text-ink">
+            {user.name || user.email}
+          </span>
+          <span className="block truncate text-[11.5px] text-mist">{user.role}</span>
+        </span>
+        <form action={signOut}>
+          <input type="hidden" name="next" value="/admin/login" />
+          <button
+            type="submit"
+            className="flex size-8 items-center justify-center rounded-xl text-mist transition hover:bg-red-100 hover:text-red"
+            aria-label="Sair"
+          >
+            <LogOut className="size-4" />
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function NavContent(props: Props & { onNavigate?: () => void }) {
+  const { groups, pendingOrders, activeProducts, canSearchProducts, onNavigate } = props;
   const pathname = usePathname();
 
   return (
     <div className="flex h-full flex-col">
-      <Link href="/admin" onClick={onNavigate} className="px-2 pt-1 pb-8">
+      <Link href="/admin" onClick={onNavigate} className="px-2 pt-1 pb-4">
         <Logo tone="light" />
       </Link>
 
-      <nav className="flex-1 scrollbar-none space-y-6 overflow-y-auto" aria-label="Painel">
+      {canSearchProducts && <ProductSearch onNavigate={onNavigate} />}
+
+      <nav className="min-h-0 flex-1 scrollbar-none space-y-3.5 overflow-y-auto" aria-label="Painel">
         {groups.map((group) => (
           <div key={group.group}>
-            <p className="mb-2 px-3 text-[11px] font-semibold tracking-[0.12em] text-mist uppercase">{group.group}</p>
-            <ul className="space-y-1">
+            <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-[0.12em] text-mist uppercase">{group.group}</p>
+            <ul className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = ICONS[item.key];
                 const active = isActive(pathname, item.href);
@@ -98,7 +187,7 @@ function NavContent({ groups, pendingOrders, activeProducts, onNavigate }: Props
                       href={item.href}
                       onClick={onNavigate}
                       className={cn(
-                        "relative flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] font-medium transition",
+                        "relative flex items-center gap-3 rounded-2xl px-3.5 py-[7px] text-[14px] font-medium transition",
                         active ? "text-white" : "text-ink/60 hover:bg-cloud hover:text-ink",
                       )}
                     >
@@ -125,20 +214,32 @@ function NavContent({ groups, pendingOrders, activeProducts, onNavigate }: Props
         ))}
       </nav>
 
-      <div className="relative mt-6 overflow-hidden rounded-[22px] bg-linear-to-br from-navy-950 via-navy-900 to-navy p-5 text-white [@media(max-height:900px)]:hidden">
-        <div className="absolute -top-2 right-1 opacity-90">
-          <GlassArt />
-        </div>
-        <p className="relative mt-10 text-[17px] leading-tight font-bold">Catálogo no ar</p>
-        <p className="relative mt-1 text-[12px] text-white/65">{activeProducts} rótulos visíveis para os clientes.</p>
-        <Link
-          href="/"
+      <Link
+        href="/"
+        target="_blank"
+        className="group mt-3 flex items-center gap-3 overflow-hidden rounded-[20px] bg-linear-to-br from-navy-950 via-navy-900 to-navy py-2 pr-4 pl-3 text-white"
+      >
+        <GlassArt />
+        <span className="min-w-0 flex-1">
+          <span className="block text-[14px] leading-tight font-bold">Ver loja</span>
+          <span className="block truncate text-[11.5px] text-white/65">{activeProducts} rótulos no ar</span>
+        </span>
+        <ExternalLink className="size-4 text-white/70 transition group-hover:text-white" />
+      </Link>
+
+      <UserPanel {...props} />
+
+      <p className="mt-2 text-center text-[11px] text-mist">
+        Desenvolvido por{" "}
+        <a
+          href="https://www.mthcode.com.br/"
           target="_blank"
-          className="relative mt-4 flex h-10 items-center justify-center gap-2 rounded-xl bg-white text-[13px] font-semibold text-navy transition hover:bg-cloud"
+          rel="noopener"
+          className="font-semibold text-navy transition hover:text-red"
         >
-          Ver loja <ExternalLink className="size-3.5" />
-        </Link>
-      </div>
+          mthcode
+        </a>
+      </p>
     </div>
   );
 }
@@ -148,18 +249,26 @@ export function AdminSidebar(props: Props) {
 
   return (
     <>
-      <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-[248px] shrink-0 rounded-[28px] bg-white p-4 shadow-[0_1px_2px_rgba(23,25,43,0.04)] lg:block">
+      <aside className="sticky top-4 hidden h-[calc(100svh-2rem)] w-[248px] shrink-0 rounded-[28px] bg-white p-4 shadow-[0_1px_2px_rgba(23,25,43,0.04)] lg:block">
         <NavContent {...props} />
       </aside>
 
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed top-4 left-4 z-30 flex size-11 items-center justify-center rounded-2xl bg-white text-ink shadow-sm lg:hidden"
-        aria-label="Abrir menu"
-      >
-        <Menu className="size-5" />
-      </button>
+      <div className="flex items-center justify-between rounded-[22px] bg-white py-2 pr-2 pl-4 shadow-[0_1px_2px_rgba(23,25,43,0.04)] lg:hidden">
+        <Link href="/admin" aria-label="Painel">
+          <Logo tone="light" />
+        </Link>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="relative flex size-11 items-center justify-center rounded-2xl text-ink hover:bg-cloud"
+          aria-label="Abrir menu"
+        >
+          <Menu className="size-5" />
+          {props.canSeeOrders && props.pendingOrders > 0 && (
+            <span className="absolute top-2.5 right-2.5 size-2 rounded-full border border-white bg-red" />
+          )}
+        </button>
+      </div>
 
       <AnimatePresence>
         {open && (
@@ -171,7 +280,7 @@ export function AdminSidebar(props: Props) {
             onClick={() => setOpen(false)}
           >
             <motion.aside
-              className="h-full w-72 bg-white p-4"
+              className="h-full w-[290px] max-w-[85vw] bg-white p-4"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
