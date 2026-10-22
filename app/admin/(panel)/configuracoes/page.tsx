@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
-import { CircleDollarSign, Contact, Store, type LucideIcon } from "lucide-react";
+import { CircleDollarSign, Contact, Store } from "lucide-react";
 import { ActionSwitch } from "@/components/admin/controls";
 import { SettingsForm } from "@/components/admin/team-forms";
-import { Card, PanelSkeleton } from "@/components/admin/ui";
+import { PanelSkeleton, Section } from "@/components/admin/ui";
 import { setStorePrices } from "@/lib/admin/team-actions";
 import { can, requireStaff } from "@/lib/auth/viewer";
 import { createClient } from "@/lib/supabase/server";
@@ -48,31 +48,6 @@ async function Settings() {
         <SettingsForm settings={settings} />
       </Section>
     </div>
-  );
-}
-
-function Section({
-  icon: Icon,
-  title,
-  description,
-  children,
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <Card className="grid gap-6 p-6 md:p-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12">
-      <div>
-        <span className="flex size-10 items-center justify-center rounded-2xl bg-navy text-white">
-          <Icon className="size-[18px]" strokeWidth={1.8} />
-        </span>
-        <h2 className="mt-4 text-[17px] font-bold text-ink">{title}</h2>
-        <p className="mt-1 text-[13px] leading-relaxed text-mist">{description}</p>
-      </div>
-      <div className="min-w-0">{children}</div>
-    </Card>
   );
 }
 

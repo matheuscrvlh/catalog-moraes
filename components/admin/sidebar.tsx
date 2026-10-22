@@ -163,16 +163,23 @@ function UserPanel({ user, pendingOrders, canSeeOrders, onNavigate }: Props & { 
           <div className="mx-2 my-1 h-px bg-cloud" />
         </>
       )}
-      <div className="flex items-center gap-3 px-1 py-0.5">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-red to-wine text-xs font-bold text-white">
-          {initials(user.name || user.email)}
-        </span>
-        <span className="min-w-0 flex-1" title={user.email}>
-          <span className="block truncate text-[13.5px] leading-tight font-bold text-ink">
-            {user.name || user.email}
+      <div className="flex items-center gap-1 py-0.5">
+        <Link
+          href="/admin/perfil"
+          onClick={onNavigate}
+          title="Meu perfil"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-1 py-0.5 transition hover:bg-cloud"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-red to-wine text-xs font-bold text-white">
+            {initials(user.name || user.email)}
           </span>
-          <span className="block truncate text-[11.5px] text-mist">{user.role}</span>
-        </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[13.5px] leading-tight font-bold text-ink">
+              {user.name || user.email}
+            </span>
+            <span className="block truncate text-[11.5px] text-mist">{user.role}</span>
+          </span>
+        </Link>
         <form action={signOut}>
           <input type="hidden" name="next" value="/admin/login" />
           <button

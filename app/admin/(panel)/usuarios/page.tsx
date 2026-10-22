@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { InviteMemberSheet, MemberControls } from "@/components/admin/team-forms";
+import { DeleteMemberButton, EditMemberSheet, InviteMemberSheet, MemberControls } from "@/components/admin/team-forms";
 import { Badge, PageHeader, PanelSkeleton, table } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/auth/viewer";
 import { formatDay } from "@/lib/format";
@@ -45,7 +45,7 @@ async function Team() {
               <th className={table.th}>Cargo atual</th>
               <th className={table.th}>Status</th>
               <th className={table.th}>Desde</th>
-              <th className={`${table.th} text-right`}>Acesso</th>
+              <th className={`${table.th} text-right`}>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -58,7 +58,10 @@ async function Team() {
                     </span>
                     <span>
                       <span className="block font-medium">{member.full_name || member.email}</span>
-                      <span className="text-xs text-ink/45">{member.email}</span>
+                      <span className="text-xs text-ink/45">
+                        {member.email}
+                        {member.phone && ` · ${member.phone}`}
+                      </span>
                     </span>
                   </span>
                 </td>
@@ -75,7 +78,10 @@ async function Team() {
                       active={member.active}
                       roles={roles ?? []}
                       isSelf={member.id === viewer.id}
-                    />
+                    >
+                      <EditMemberSheet member={member} />
+                      <DeleteMemberButton memberId={member.id} name={member.full_name || member.email} />
+                    </MemberControls>
                   )}
                 </td>
               </tr>

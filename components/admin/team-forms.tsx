@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Pencil, Plus, UserMinus } from "lucide-react";
+import { useState, useTransition, type ReactNode } from "react";
+import Link from "next/link";
+import { KeyRound, Pencil, Plus, UserMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { PERMISSIONS, PERMISSION_KEYS } from "@/lib/auth/permissions";
-import { inviteMember, saveRole, saveSettings, updateMember } from "@/lib/admin/team-actions";
+import { deleteMember, editMember, inviteMember, saveRole, saveSettings, updateMember } from "@/lib/admin/team-actions";
 import { cn } from "@/lib/cn";
 import { ActionForm } from "./action-form";
-import { Sheet, Switch } from "./controls";
+import { DeleteButton, Sheet, Switch } from "./controls";
 import { useToast } from "./toaster";
 
 type RoleOption = { id: string; name: string };
@@ -65,12 +66,14 @@ export function MemberControls({
   active,
   roles,
   isSelf,
+  children,
 }: {
   memberId: string;
   roleId: string;
   active: boolean;
   roles: RoleOption[];
   isSelf: boolean;
+  children?: ReactNode;
 }) {
   const notify = useToast();
   const [pending, startTransition] = useTransition();
@@ -87,7 +90,18 @@ export function MemberControls({
     });
   };
 
-  if (isSelf) return <span className="text-xs text-ink/40">Você</span>;
+  if (isSelf) {
+    return (
+      <span className="flex justify-end">
+        <Link
+          href="/admin/perfil"
+          className="rounded-xl px-3 py-2 text-xs font-medium text-ink/55 transition hover:bg-cloud hover:text-ink"
+        >
+          Você · Meu perfil
+        </Link>
+      </span>
+    );
+  }
 
   return (
     <span className={cn("flex items-center justify-end gap-3", pending && "opacity-60")}>
@@ -121,7 +135,77 @@ export function MemberControls({
       >
         <UserMinus className="size-4" />
       </button>
+      {children}
     </span>
+  );
+}
+
+type MemberRecord = { id: string; full_name: string; email: string; phone: string | null };
+
+export function EditMemberSheet({ member }: { member: MemberRecord }) {
+  return (
+    <Sheet
+      title="Editar usuário"
+      description="Atualize os dados de acesso. Para trocar a senha, preencha o campo de nova senha."
+      trigger={(open) => (
+        <button
+          type="button"
+          onClick={open}
+          className="rounded-xl p-2 text-ink/45 transition hover:bg-cloud hover:text-ink"
+          aria-label={`Editar ${member.full_name || member.email}`}
+        >
+          <Pencil className="size-4" />
+        </button>
+      )}
+    >
+      {(close) => (
+        <ActionForm action={editMember} onDone={close}>
+          {(errors) => (
+            <>
+              <input type="hidden" name="id" value={member.id} />
+              <Field tone="light" label="Nome" error={errors.fullName}>
+                <Input tone="light" name="fullName" defaultValue={member.full_name} autoComplete="off" />
+              </Field>
+              <Field tone="light" label="E-mail de acesso" error={errors.email}>
+                <Input tone="light" name="email" type="email" defaultValue={member.email} autoComplete="off" />
+              </Field>
+              <Field tone="light" label="Telefone" error={errors.phone}>
+                <Input
+                  tone="light"
+                  name="phone"
+                  type="tel"
+                  defaultValue={member.phone ?? ""}
+                  placeholder="(22) 99999-9999"
+                />
+              </Field>
+              <div className="rounded-2xl border border-cloud bg-cloud/40 p-4">
+                <p className="mb-3 flex items-center gap-2 text-[13px] font-semibold text-ink">
+                  <KeyRound className="size-4 text-navy" /> Redefinir senha
+                </p>
+                <Field
+                  tone="light"
+                  label="Nova senha"
+                  error={errors.password}
+                  hint="Em branco, a senha atual é mantida. Compartilhe a nova senha com o usuário."
+                >
+                  <Input tone="light" name="password" type="password" autoComplete="new-password" />
+                </Field>
+              </div>
+            </>
+          )}
+        </ActionForm>
+      )}
+    </Sheet>
+  );
+}
+
+export function DeleteMemberButton({ memberId, name }: { memberId: string; name: string }) {
+  return (
+    <DeleteButton
+      action={() => deleteMember(memberId)}
+      label={`Excluir ${name}`}
+      confirmText={`Excluir a conta de ${name}? O login deixa de existir e não é possível desfazer.`}
+    />
   );
 }
 

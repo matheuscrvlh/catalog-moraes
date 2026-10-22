@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export function PageHeader({
@@ -30,6 +31,31 @@ export function Card({ className, ...props }: ComponentProps<"section">) {
       className={cn("rounded-[26px] bg-white p-6 shadow-[0_1px_2px_rgba(23,25,43,0.04)]", className)}
       {...props}
     />
+  );
+}
+
+export function Section({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card className="grid gap-6 p-6 md:p-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12">
+      <div>
+        <span className="flex size-10 items-center justify-center rounded-2xl bg-navy text-white">
+          <Icon className="size-[18px]" strokeWidth={1.8} />
+        </span>
+        <h2 className="mt-4 text-[17px] font-bold text-ink">{title}</h2>
+        <p className="mt-1 text-[13px] leading-relaxed text-mist">{description}</p>
+      </div>
+      <div className="min-w-0">{children}</div>
+    </Card>
   );
 }
 
