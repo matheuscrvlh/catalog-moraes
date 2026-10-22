@@ -19,6 +19,7 @@ export function AdminLoginForm() {
       <AuthDivider>acesso restrito à equipe</AuthDivider>
       <FormMessage message={state.message ?? (denied ? "Este acesso não tem permissão para o painel." : undefined)} />
       <AuthInput
+        glass
         label="E-mail"
         name="email"
         type="email"
@@ -28,6 +29,7 @@ export function AdminLoginForm() {
         error={state.errors?.email}
       />
       <AuthInput
+        glass
         label="Senha"
         name="password"
         type="password"

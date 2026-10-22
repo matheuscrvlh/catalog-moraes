@@ -61,20 +61,30 @@ export function AuthScreen({ title, subtitle, image, quote, quoteAuthor, badge, 
       <div className="absolute inset-0 -z-10 bg-linear-to-r from-black/45 via-black/10 to-black/30" />
 
       <div className="flex w-full p-3 md:p-5">
-        <div className="flex w-full flex-col rounded-[28px] bg-ivory/95 px-7 py-10 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:px-12 md:max-w-[540px] md:px-14 md:py-12">
+        <div className="relative isolate flex w-full flex-col overflow-hidden rounded-[32px] border border-white/70 bg-white/65 px-6 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_40px_100px_-40px_rgba(0,0,0,0.85)] backdrop-blur-2xl backdrop-saturate-150 sm:px-12 md:max-w-[540px] md:px-14 md:py-12">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-b from-white/80 via-white/30 to-white/60"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-32 -left-24 -z-10 size-80 rounded-full bg-white/70 blur-3xl"
+          />
           <div className="flex justify-center">
             <Logo tone="light" />
           </div>
-          <div className="my-auto py-10">
+          <div className="my-auto py-8 md:py-10 [@media(max-height:700px)]:py-4">
             <div className="text-center">
               <h1 className="font-admin text-[clamp(1.9rem,3vw,2.5rem)] leading-tight font-semibold tracking-tight text-ink">
                 {title}
               </h1>
-              <p className="mt-3 text-[15px] text-stone">{subtitle}</p>
+              <p className="mt-3 text-[15px] text-stone [@media(max-height:700px)]:hidden">{subtitle}</p>
             </div>
-            <div className="mt-9">{children}</div>
+            <div className="mt-7 md:mt-9">{children}</div>
           </div>
-          <p className="text-center text-[11.5px] text-pebble">Distribuidora Moraes Comercial</p>
+          <p className="text-center text-[11.5px] text-stone [@media(max-height:700px)]:hidden">
+            Distribuidora Moraes Comercial
+          </p>
         </div>
 
         <div className="relative hidden flex-1 lg:block">

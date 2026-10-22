@@ -2,17 +2,24 @@ import type { ComponentProps, ReactNode } from "react";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-type Props = ComponentProps<"input"> & { label: string; icon?: ReactNode; error?: string; hint?: string };
+type Props = ComponentProps<"input"> & {
+  label: string;
+  icon?: ReactNode;
+  error?: string;
+  hint?: string;
+  glass?: boolean;
+};
 
-export function AuthInput({ label, icon, error, hint, className, ...props }: Props) {
+export function AuthInput({ label, icon, error, hint, glass, className, ...props }: Props) {
   return (
     <label className="block">
       <span className="mb-2 block text-[13px] font-medium text-ink">{label}</span>
       <span className="relative block">
         <input
           className={cn(
-            "h-12 w-full rounded-xl border bg-white pr-11 pl-4 text-[15px] text-ink transition outline-none placeholder:text-pebble focus:border-red/60 focus:ring-4 focus:ring-red/10",
-            error ? "border-red/60" : "border-line",
+            "h-12 w-full rounded-xl border pr-11 pl-4 text-[15px] text-ink transition outline-none placeholder:text-pebble focus:border-red/60 focus:ring-4 focus:ring-red/10",
+            glass ? "bg-white/65 backdrop-blur-md focus:bg-white/90" : "bg-white",
+            error ? "border-red/60" : glass ? "border-white/80" : "border-line",
             className,
           )}
           {...props}
@@ -46,10 +53,10 @@ export function AuthSubmit({ pending, children }: { pending: boolean; children: 
 
 export function AuthDivider({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center gap-4 text-xs text-pebble">
-      <span className="h-px flex-1 bg-line" />
+    <div className="flex items-center gap-4 text-xs text-stone">
+      <span className="h-px flex-1 bg-ink/10" />
       {children}
-      <span className="h-px flex-1 bg-line" />
+      <span className="h-px flex-1 bg-ink/10" />
     </div>
   );
 }

@@ -1,6 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
 import { AuthShowcase } from "@/components/auth/auth-card";
+import { Logo } from "@/components/brand/brand-mark";
 
 const THUMBS = [
   "/products/aurora-gran-reserva.webp",
@@ -11,8 +14,19 @@ const THUMBS = [
 export function StoreAuth({ title, subtitle, children }: { title: ReactNode; subtitle: string; children: ReactNode }) {
   return (
     <div className="grid flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-      <section className="flex flex-col justify-center px-5 pt-6 pb-20 sm:px-10 md:py-14 lg:px-14 xl:px-24">
-        <div className="mx-auto w-full max-w-110">
+      <section className="flex flex-col px-5 pt-5 pb-[88px] sm:px-10 md:pb-10 lg:px-14 xl:px-20">
+        <header className="flex items-center justify-between gap-4">
+          <Link href="/" aria-label="Moraes Comercial — início">
+            <Logo tone="light" />
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-[11px] font-medium tracking-[0.2em] text-stone uppercase transition hover:text-navy"
+          >
+            <ArrowLeft className="size-3.5" /> Voltar à loja
+          </Link>
+        </header>
+        <div className="mx-auto my-auto w-full max-w-110 py-10 [@media(max-height:700px)]:py-6">
           <p className="mb-3 text-[11px] font-semibold tracking-[0.24em] text-red uppercase [@media(max-height:700px)]:hidden">
             Área do cliente
           </p>
