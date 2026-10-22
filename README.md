@@ -2,8 +2,8 @@
 
 Catálogo B2B de vinhos da Distribuidora Moraes Comercial (para adegas, mercados, restaurantes e vinícolas) com painel administrativo.
 
-- **Loja**: home com banners fotográficos, catálogo com filtros na URL, página de produto com ficha técnica e perfil sensorial, favoritos, pedido que é gravado e enviado ao vendedor pelo WhatsApp, cadastro de empresa (CNPJ e tipo de negócio) e conta com histórico.
-- **Painel** (`/admin`): dashboard (receita, pedidos, vendas por estilo, origem dos vinhos, taxa de conversão, mapa do estoque, mapa de calor, rankings), produtos com variações e fotos, categorias, vinícolas, banners agendáveis, pedidos com status, clientes, equipe, cargos com permissões e configurações da loja.
+- **Loja**: home com banners fotográficos, catálogo com filtros na URL, página de produto com ficha técnica e perfil sensorial, favoritos, pedido enviado direto para o painel, cadastro de empresa (CNPJ e tipo de negócio) e conta com histórico.
+- **Painel** (`/admin`): dashboard (receita, pedidos, vendas por estilo, origem dos vinhos, taxa de conversão, mapa do estoque, mapa de calor, rankings), produtos com variações e fotos, categorias, vinícolas, pedidos com status e criação de pedido pelo vendedor no tablet, clientes com cadastro pela equipe, equipe, cargos com permissões e configurações da loja (preços visíveis, contato e banners agendáveis).
 
 Stack: Next.js 16 (App Router, Cache Components), React 19, Tailwind CSS 4, Supabase (Postgres + Auth + Storage), Zod e Motion.
 

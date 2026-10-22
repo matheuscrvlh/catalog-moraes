@@ -1,32 +1,29 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { CircleDollarSign, Contact, Store, type LucideIcon } from "lucide-react";
 import { ActionSwitch } from "@/components/admin/controls";
 import { SettingsForm } from "@/components/admin/team-forms";
-import { Card, PageHeader, PanelSkeleton } from "@/components/admin/ui";
+import { Card, PanelSkeleton } from "@/components/admin/ui";
 import { setStorePrices } from "@/lib/admin/team-actions";
-import { requireStaff } from "@/lib/auth/viewer";
+import { can, requireStaff } from "@/lib/auth/viewer";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Configurações" };
 
 export default function SettingsPage() {
   return (
-    <>
-      <PageHeader
-        eyebrow="Plataforma"
-        title="Configurações"
-        description="Preferências da loja e dados de contato da distribuidora."
-      />
-      <Suspense fallback={<PanelSkeleton />}>
-        <Settings />
-      </Suspense>
-    </>
+    <Suspense fallback={<PanelSkeleton />}>
+      <Settings />
+    </Suspense>
   );
 }
 
 async function Settings() {
-  await requireStaff("settings.manage");
+  const viewer = await requireStaff();
+  if (!can(viewer, "settings.manage")) {
+    redirect(can(viewer, "catalog.manage") ? "/admin/configuracoes/banners" : "/admin/sem-acesso");
+  }
   const supabase = await createClient();
   const { data: settings } = await supabase.from("store_settings").select("*").eq("id", 1).single();
   if (!settings) return null;

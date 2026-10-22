@@ -8,7 +8,6 @@ import { COMPANY_FIELDS, companySchema } from "@/lib/customers/schema";
 import { fieldErrors, formText, type FormState } from "@/lib/forms";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { stripAccents } from "@/lib/text";
 import { FORBIDDEN } from "./errors";
 
 const customerSchema = companySchema.extend({
@@ -79,48 +78,6 @@ export async function searchCustomers(term: string): Promise<CustomerOption[]> {
     contact: row.full_name ?? "",
     email: row.email ?? "",
   }));
-}
-
-export type VariantOption = {
-  id: string;
-  product: string;
-  producer: string | null;
-  label: string;
-  price: number | null;
-  stock: number;
-  imagePath: string | null;
-};
-
-export async function searchVariants(term: string): Promise<VariantOption[]> {
-  if (!(await authorize("orders.manage"))) return [];
-  const words = stripAccents(term).toLowerCase().split(/\s+/).filter(Boolean).slice(0, 5);
-  if (!words.length) return [];
-
-  const supabase = await createClient();
-  let query = supabase
-    .from("products")
-    .select(
-      "name, producer:producers(name), product_images(path, position), product_variants(id, label, price, promo_price, stock, active, position)",
-    )
-    .eq("active", true);
-  for (const word of words) query = query.ilike("search_text", `%${word.replace(/[\\%_]/g, "")}%`);
-  const { data } = await query.order("name").limit(10);
-
-  return (data ?? []).flatMap((product) => {
-    const image = [...product.product_images].sort((a, b) => a.position - b.position)[0]?.path ?? null;
-    return [...product.product_variants]
-      .filter((variant) => variant.active)
-      .sort((a, b) => a.position - b.position)
-      .map((variant) => ({
-        id: variant.id,
-        product: product.name,
-        producer: product.producer?.name ?? null,
-        label: variant.label,
-        price: variant.promo_price ?? variant.price,
-        stock: variant.stock,
-        imagePath: image,
-      }));
-  });
 }
 
 const staffOrderSchema = z.object({

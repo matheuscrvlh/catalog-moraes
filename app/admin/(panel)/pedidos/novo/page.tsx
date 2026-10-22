@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { OrderBuilder } from "@/components/admin/order-builder";
 import { PageHeader, PanelSkeleton } from "@/components/admin/ui";
+import { getOrderCatalog } from "@/lib/admin/order-catalog";
 import { requireStaff } from "@/lib/auth/viewer";
 
 export const metadata: Metadata = { title: "Novo pedido" };
@@ -19,7 +20,7 @@ export default function NewOrderPage() {
       </Link>
       <PageHeader
         title="Novo pedido"
-        description="Monte o pedido para o cliente. Ele aparece na conta da empresa e segue o mesmo fluxo de atendimento."
+        description="Navegue pelo catálogo com o cliente e monte o pedido. Ele aparece na conta da empresa e segue o mesmo fluxo de atendimento."
       />
       <Suspense fallback={<PanelSkeleton />}>
         <Builder />
@@ -30,5 +31,5 @@ export default function NewOrderPage() {
 
 async function Builder() {
   await requireStaff("orders.manage");
-  return <OrderBuilder />;
+  return <OrderBuilder products={await getOrderCatalog()} />;
 }

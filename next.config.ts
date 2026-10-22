@@ -29,6 +29,9 @@ const nextConfig: NextConfig = {
     dangerouslyAllowLocalIP: isLocalSupabase,
     qualities: [75, 90],
   },
+  async redirects() {
+    return [{ source: "/admin/banners", destination: "/admin/configuracoes/banners", permanent: true }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

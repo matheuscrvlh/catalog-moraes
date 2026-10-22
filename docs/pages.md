@@ -124,12 +124,12 @@ Abas: **Pedidos** (histórico com linha do tempo de status), **Favoritos**, **Da
 - **Login** `/admin/login`: escuro, só e-mail e senha. Usuário sem cargo não entra.
 - **Produtos** `/admin/produtos`: tabela com foto, estilo, vinícola, faixa de preço, barra de estoque e status; busca e filtro por estilo.
 - **Produto** `/admin/produtos/novo` e `/admin/produtos/[id]`: seções (identificação, classificação, perfil sensorial com sliders, serviço, variações em linhas editáveis, imagens com upload) e prévia do card ao vivo.
-- **Categorias**, **Vinícolas**, **Banners**: listas com formulário lateral.
+- **Categorias**, **Vinícolas**: listas com formulário lateral.
 - **Pedidos** `/admin/pedidos`: abas por status com contagem e origem (loja ou equipe); detalhe com itens, cliente, troca de status, notas internas e botão para chamar o cliente no WhatsApp.
-- **Novo pedido** `/admin/pedidos/novo`: o vendedor escolhe o cliente (ou cadastra um novo), busca os vinhos, ajusta quantidades e cria o pedido em nome da empresa (`admin_create_order`). Entra como "Em atendimento".
+- **Novo pedido** `/admin/pedidos/novo`: pensado para tablet, o vendedor percorre o catálogo completo com o cliente (busca, filtro por estilo e "No pedido" para ver o que já entrou), escolhe ou cadastra o cliente e cria o pedido em nome da empresa (`admin_create_order`). Entra como "Em atendimento".
 - **Clientes** `/admin/clientes`: pedidos, total gasto e último pedido. "Novo cliente" cadastra a empresa; com senha, ela também acessa a loja.
 - **Equipe** `/admin/usuarios`: convidar membro (cria acesso), trocar cargo, desativar.
 - **Cargos** `/admin/cargos`: matriz de permissões por cargo.
-- **Configurações** `/admin/configuracoes`: preferências da plataforma (exibir ou ocultar preços na loja) e dados da loja usados no site e no WhatsApp.
+- **Configurações** `/admin/configuracoes`: abas **Geral** (exibir ou ocultar preços na loja e dados de contato) e **Banners** `/admin/configuracoes/banners` (carrossel da home com agendamento).
 
 O menu mostra só o que o cargo permite, e cada ação no servidor confere a permissão de novo antes de tocar no banco.

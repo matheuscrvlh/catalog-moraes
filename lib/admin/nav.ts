@@ -1,18 +1,15 @@
 import { hasPermission, type Permission } from "@/lib/auth/permissions";
 
 export type NavKey =
-  | "dashboard"
-  | "products"
-  | "categories"
-  | "producers"
-  | "banners"
-  | "orders"
-  | "customers"
-  | "users"
-  | "roles"
-  | "settings";
+  "dashboard" | "products" | "categories" | "producers" | "orders" | "customers" | "users" | "roles" | "settings";
 
-export type NavItem = { key: NavKey; href: string; label: string; permission: Permission; keywords?: string };
+export type NavItem = {
+  key: NavKey;
+  href: string;
+  label: string;
+  permission: Permission | Permission[];
+  keywords?: string;
+};
 
 export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
   {
@@ -50,13 +47,6 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
         label: "Vinícolas",
         permission: "catalog.manage",
         keywords: "marcas produtores",
-      },
-      {
-        key: "banners",
-        href: "/admin/banners",
-        label: "Banners",
-        permission: "catalog.manage",
-        keywords: "home destaques imagens",
       },
     ],
   },
@@ -105,8 +95,8 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
         key: "settings",
         href: "/admin/configuracoes",
         label: "Configurações",
-        permission: "settings.manage",
-        keywords: "loja preços contato whatsapp plataforma",
+        permission: ["settings.manage", "catalog.manage"],
+        keywords: "loja preços contato whatsapp plataforma banners home destaques",
       },
     ],
   },
@@ -115,10 +105,15 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
 export function navFor(permissions: readonly string[]) {
   return ADMIN_NAV.map((group) => ({
     ...group,
-    items: group.items.filter((item) => hasPermission(permissions, item.permission)),
+    items: group.items.filter((item) => [item.permission].flat().some((key) => hasPermission(permissions, key))),
   })).filter((group) => group.items.length > 0);
 }
 
 export function landingFor(permissions: readonly string[]) {
   return navFor(permissions)[0]?.items[0]?.href ?? "/admin/sem-acesso";
 }
+
+export const SETTINGS_TABS: { href: string; label: string; permission: Permission }[] = [
+  { href: "/admin/configuracoes", label: "Geral", permission: "settings.manage" },
+  { href: "/admin/configuracoes/banners", label: "Banners", permission: "catalog.manage" },
+];

@@ -5,7 +5,7 @@ import { CalendarClock } from "lucide-react";
 import { DiamondRing } from "@/components/brand/brand-mark";
 import { BannerSheet } from "@/components/admin/catalog-forms";
 import { ActionSwitch, DeleteButton } from "@/components/admin/controls";
-import { EmptyState, PageHeader, PanelSkeleton } from "@/components/admin/ui";
+import { EmptyState, PanelSkeleton } from "@/components/admin/ui";
 import { deleteBanner, setBannerActive } from "@/lib/admin/catalog-actions";
 import { requireStaff } from "@/lib/auth/viewer";
 import { cn } from "@/lib/cn";
@@ -24,12 +24,12 @@ const THEMES: Record<string, string> = {
 export default function BannersPage() {
   return (
     <>
-      <PageHeader
-        eyebrow="Catálogo"
-        title="Banners"
-        description="O carrossel da página inicial. Agende início e fim para campanhas e promoções."
-        actions={<BannerSheet />}
-      />
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-mist">
+          O carrossel da página inicial. Agende início e fim para campanhas e promoções.
+        </p>
+        <BannerSheet />
+      </div>
       <Suspense fallback={<PanelSkeleton />}>
         <BannersGrid />
       </Suspense>
