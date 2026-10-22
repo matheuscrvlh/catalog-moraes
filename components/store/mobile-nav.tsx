@@ -15,7 +15,7 @@ export function MobileNav() {
 
   const left = [
     { href: "/", label: "Início", icon: House, active: pathname === "/" },
-    { href: "/vinhos", label: "Vinhos", icon: Wine, active: pathname.startsWith("/vinhos") },
+    { href: "/vinhos", label: "Catálogo", icon: Wine, active: pathname.startsWith("/vinhos") },
   ];
   const right = [
     { href: "/conta?aba=favoritos", label: "Favoritos", icon: Heart, active: false },

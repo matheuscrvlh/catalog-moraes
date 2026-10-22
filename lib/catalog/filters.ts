@@ -75,3 +75,5 @@ export function withoutPriceFilters(filters: CatalogFilters): CatalogFilters {
     ordem: PRICE_SORTS.includes(filters.ordem) ? "destaque" : filters.ordem,
   };
 }
+
+export const WINE_CATEGORIES = ["tintos", "brancos", "roses", "espumantes", "frisantes", "sobremesa"];

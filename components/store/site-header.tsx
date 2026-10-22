@@ -14,7 +14,7 @@ import { SearchOverlay } from "./search-overlay";
 
 const NAV = [
   { href: "/", label: "Início" },
-  { href: "/vinhos", label: "Vinhos" },
+  { href: "/vinhos", label: "Catálogo" },
   { href: "/vinhos?categoria=espumantes", label: "Espumantes" },
   { href: "/vinhos?busca=exclusivo", label: "Exclusivos" },
   { href: "/#para-empresas", label: "Para empresas" },
@@ -85,7 +85,7 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center justify-end gap-0.5">
-            <button type="button" onClick={() => setSearching(true)} className={icon} aria-label="Buscar vinhos">
+            <button type="button" onClick={() => setSearching(true)} className={icon} aria-label="Buscar produtos">
               <Search className="size-[18px]" strokeWidth={1.7} />
             </button>
             <Link href="/conta?aba=favoritos" className={cn(icon, "hidden md:flex")} aria-label="Favoritos">

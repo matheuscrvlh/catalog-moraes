@@ -9,6 +9,7 @@ import { SensoryProfile } from "@/components/store/product/sensory-profile";
 import { ViewTracker } from "@/components/store/product/view-tracker";
 import { SectionTitle } from "@/components/store/home/section-title";
 import { Reveal } from "@/components/ui/reveal";
+import { WINE_CATEGORIES } from "@/lib/catalog/filters";
 import { getProduct, getProductSlugs, getRelatedProducts } from "@/lib/catalog/queries";
 import { cn } from "@/lib/cn";
 import { env } from "@/lib/env";
@@ -50,6 +51,9 @@ async function ProductView({ params }: { params: Params }) {
 
   const related = await getRelatedProducts(product.categorySlug, product.id, 4);
   const sweetness = product.sweetness ? SWEETNESS[product.sweetness] : null;
+  const isWine = WINE_CATEGORIES.includes(product.categorySlug);
+  const hasProfile = Object.values(product.profile).some((value) => value != null);
+  const hasAbout = Boolean(product.description || product.aromaNotes || product.palateNotes || product.pairing.length);
   const highlights = [
     {
       value: sweetness ? `${product.categoryName.replace(/s$/, "")} ${sweetness.toLowerCase()}` : product.categoryName,
@@ -63,7 +67,7 @@ async function ProductView({ params }: { params: Params }) {
   ];
   const sheet = [
     { label: product.grapes.length > 1 ? "Uvas" : "Uva", value: product.grapes.join(", ") },
-    { label: "Vinícola", value: product.producer },
+    { label: isWine ? "Vinícola" : "Marca", value: product.producer },
     { label: "Origem", value: [product.region, product.country].filter(Boolean).join(", ") },
     { label: "Doçura", value: sweetness },
     { label: "Teor alcoólico", value: product.alcohol != null ? `${product.alcohol.toLocaleString("pt-BR")}%` : null },
@@ -109,7 +113,7 @@ async function ProductView({ params }: { params: Params }) {
           </Link>
           <span className="mx-2 text-pebble">/</span>
           <Link href="/vinhos" className="hover:text-navy">
-            Vinhos
+            Catálogo
           </Link>
           <span className="mx-2 text-pebble">/</span>
           <Link href={`/vinhos?categoria=${product.categorySlug}`} className="hover:text-navy">
@@ -181,39 +185,50 @@ async function ProductView({ params }: { params: Params }) {
       </section>
 
       <section className="border-y border-line bg-white">
-        <div className="mx-auto grid max-w-7xl gap-14 px-5 py-20 md:px-8 lg:grid-cols-[1.2fr_1fr_0.9fr]">
-          <Reveal>
-            <h2 className="caps text-xl text-navy">Sobre o vinho</h2>
-            {product.description && (
-              <p className="mt-5 text-[15.5px] leading-relaxed text-stone">{product.description}</p>
-            )}
-            <dl className="mt-8 space-y-5">
-              {product.aromaNotes && (
-                <div className="border-l-2 border-red pl-5">
-                  <dt className="text-[11px] tracking-[0.2em] text-pebble uppercase">Aroma</dt>
-                  <dd className="mt-1 font-display text-lg text-ink">{product.aromaNotes}</dd>
+        <div
+          className={cn(
+            "mx-auto grid max-w-7xl gap-14 px-5 py-20 md:px-8",
+            hasAbout && hasProfile
+              ? "lg:grid-cols-[1.2fr_1fr_0.9fr]"
+              : hasAbout || hasProfile
+                ? "lg:grid-cols-2"
+                : "max-w-3xl",
+          )}
+        >
+          {hasAbout && (
+            <Reveal>
+              <h2 className="caps text-xl text-navy">{isWine ? "Sobre o vinho" : "Sobre o produto"}</h2>
+              {product.description && (
+                <p className="mt-5 text-[15.5px] leading-relaxed text-stone">{product.description}</p>
+              )}
+              <dl className="mt-8 space-y-5">
+                {product.aromaNotes && (
+                  <div className="border-l-2 border-red pl-5">
+                    <dt className="text-[11px] tracking-[0.2em] text-pebble uppercase">Aroma</dt>
+                    <dd className="mt-1 font-display text-lg text-ink">{product.aromaNotes}</dd>
+                  </div>
+                )}
+                {product.palateNotes && (
+                  <div className="border-l-2 border-navy pl-5">
+                    <dt className="text-[11px] tracking-[0.2em] text-pebble uppercase">Paladar</dt>
+                    <dd className="mt-1 font-display text-lg text-ink">{product.palateNotes}</dd>
+                  </div>
+                )}
+              </dl>
+              {product.pairing.length > 0 && (
+                <div className="mt-8">
+                  <p className="text-[11px] tracking-[0.2em] text-pebble uppercase">Harmoniza com</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {product.pairing.map((item) => (
+                      <span key={item} className="bg-linen px-3.5 py-1.5 text-sm text-ink">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
-              {product.palateNotes && (
-                <div className="border-l-2 border-navy pl-5">
-                  <dt className="text-[11px] tracking-[0.2em] text-pebble uppercase">Paladar</dt>
-                  <dd className="mt-1 font-display text-lg text-ink">{product.palateNotes}</dd>
-                </div>
-              )}
-            </dl>
-            {product.pairing.length > 0 && (
-              <div className="mt-8">
-                <p className="text-[11px] tracking-[0.2em] text-pebble uppercase">Harmoniza com</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {product.pairing.map((item) => (
-                    <span key={item} className="bg-linen px-3.5 py-1.5 text-sm text-ink">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </Reveal>
+            </Reveal>
+          )}
 
           <Reveal delay={0.08}>
             <h2 className="caps text-xl text-navy">Ficha técnica</h2>
@@ -227,11 +242,13 @@ async function ProductView({ params }: { params: Params }) {
             </dl>
           </Reveal>
 
-          <Reveal delay={0.16} className="bg-ivory p-7">
-            <h2 className="caps text-xl text-navy">Perfil sensorial</h2>
-            <p className="mt-1 mb-7 text-sm text-stone">Como esse vinho se comporta na taça.</p>
-            <SensoryProfile profile={product.profile} />
-          </Reveal>
+          {hasProfile && (
+            <Reveal delay={0.16} className="bg-ivory p-7">
+              <h2 className="caps text-xl text-navy">Perfil sensorial</h2>
+              <p className="mt-1 mb-7 text-sm text-stone">Como esse vinho se comporta na taça.</p>
+              <SensoryProfile profile={product.profile} />
+            </Reveal>
+          )}
         </div>
       </section>
 

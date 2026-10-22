@@ -88,7 +88,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
           onClick={onClose}
           role="dialog"
           aria-modal="true"
-          aria-label="Buscar vinhos"
+          aria-label="Buscar produtos"
         >
           <motion.div
             initial={{ y: -24, opacity: 0 }}

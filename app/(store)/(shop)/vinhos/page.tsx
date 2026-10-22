@@ -19,8 +19,8 @@ import { getCatalogOverview, getStoreSettings, searchCatalog } from "@/lib/catal
 import { formatPrice, SWEETNESS } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "Catálogo de vinhos",
-  description: "Catálogo de vinhos tintos, brancos, rosés e espumantes para adegas, mercados e restaurantes.",
+  title: "Catálogo",
+  description: "Vinhos, espumantes, destilados, cervejas, bebidas e mercearia para adegas, mercados e restaurantes.",
 };
 
 export default function CatalogPage({ searchParams }: PageProps<"/vinhos">) {
@@ -32,14 +32,14 @@ export default function CatalogPage({ searchParams }: PageProps<"/vinhos">) {
         <div className="relative mx-auto max-w-7xl px-5 py-20 text-center text-white md:px-8">
           <p className="font-script text-4xl text-white/80">Catálogo</p>
           <h1 className="mt-2 font-display text-[clamp(2.6rem,5vw,4rem)] leading-none font-medium tracking-[0.12em] uppercase">
-            Nossos vinhos
+            Nossos produtos
           </h1>
           <nav aria-label="Trilha" className="mt-5 text-[11px] tracking-[0.2em] text-white/60 uppercase">
             <Link href="/" className="hover:text-white">
               Início
             </Link>
             <span className="mx-2">/</span>
-            <span className="text-white">Vinhos</span>
+            <span className="text-white">Catálogo</span>
           </nav>
         </div>
       </section>
@@ -59,7 +59,7 @@ async function Catalog({ searchParams }: { searchParams: PageProps<"/vinhos">["s
   const category = overview.categories.find((entry) => entry.slug === filters.categoria);
   const chips = describeFilters(filters, category?.name);
   const hasMore = items.length < total;
-  const title = filters.busca ? `Resultados para “${filters.busca}”` : (category?.name ?? "Todos os vinhos");
+  const title = filters.busca ? `Resultados para “${filters.busca}”` : (category?.name ?? "Todos os produtos");
 
   return (
     <div className="grid gap-12 lg:grid-cols-[240px_1fr]">
@@ -74,7 +74,7 @@ async function Catalog({ searchParams }: { searchParams: PageProps<"/vinhos">["s
           <div>
             <h2 className="caps text-2xl text-navy">{title}</h2>
             <p className="mt-1 text-sm text-stone">
-              {total} {total === 1 ? "rótulo encontrado" : "rótulos encontrados"}
+              {total} {total === 1 ? "produto encontrado" : "produtos encontrados"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -114,7 +114,7 @@ async function Catalog({ searchParams }: { searchParams: PageProps<"/vinhos">["s
               Nenhum rótulo combina com esses filtros. Tente ampliar a busca ou fale com o seu vendedor.
             </p>
             <ButtonLink href="/vinhos" variant="outline" className="mt-8">
-              Ver todos os vinhos
+              Ver todos os produtos
             </ButtonLink>
           </div>
         ) : (
